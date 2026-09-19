@@ -86,10 +86,10 @@ function pageDashboard(){
       <div class="status">● 사업자 설정 완료 · ${esc(state.profile.taxType)}</div>
     </div>
     <div class="metrics">
-      ${metric("이번 달 매출",won(m.sales),"${m.list.filter(x=>x.type==='매출').length}건 등록","up")}
-      ${metric("이번 달 지출",won(m.costs),"${m.list.filter(x=>x.type==='매입').length}건 등록")}
+      ${metric("이번 달 매출",won(m.sales),m.list.filter(x=>x.type==="매출").length+"건 등록","up")}
+      ${metric("이번 달 지출",won(m.costs),m.list.filter(x=>x.type==="매입").length+"건 등록")}
       ${metric("예상 영업잔액",won(m.profit),"매출 - 등록 지출")}
-      ${metric("미수금",won(receivable),"${state.clients.filter(x=>x.receivable>0).length}개 거래처","")}
+      ${metric("미수금",won(receivable),state.clients.filter(x=>x.receivable>0).length+"개 거래처","")}
     </div>
     <div class="grid-2">
       <div>
