@@ -425,7 +425,10 @@ function openQuick(){
   $("#quickForm [name=date]").value=new Date().toISOString().slice(0,10);
 }
 
-$$(".nav-item[data-page]").forEach(btn=>btn.addEventListener("click",()=>render(btn.dataset.page)));
+$(".nav-item[data-page]").forEach(btn=>btn.addEventListener("click",()=>{
+  if(btn.dataset.page==="calculator")currentCalculator=null;
+  render(btn.dataset.page);
+}));
 $("#openQuick").onclick=openQuick;
 $$("[data-close]").forEach(b=>b.onclick=()=>$("#"+b.dataset.close).classList.add("hidden"));
 $("#quickModal").addEventListener("click",e=>{if(e.target.id==="quickModal")e.currentTarget.classList.add("hidden")});
