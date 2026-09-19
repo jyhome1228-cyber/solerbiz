@@ -449,13 +449,22 @@ $("#demoStart").onclick=()=>{
 $("#resetDemo").onclick=()=>{
   if(!confirm("저장된 테스트 데이터를 초기화할까요?"))return;
   ["solerbiz.profile","solerbiz.transactions","solerbiz.clients","solerbiz.tasks"].forEach(k=>localStorage.removeItem(k));
-  location.reload();
+  state.profile={...demoProfile};
+  state.transactions=[...demoTransactions];
+  state.clients=[...demoClients];
+  state.tasks=[
+    {id:1,text:"9월 매출 누락 여부 확인",done:false},
+    {id:2,text:"3.3% 지급내역 정리",done:false},
+    {id:3,text:"미수금 입금일 확인",done:true}
+  ];
+  save();
+  currentCalculator=null;
+  render("dashboard");
 };
-if(state.profile){
-  $("#onboardingModal").classList.add("hidden");
-  if(!state.transactions.length)state.transactions=[...demoTransactions];
-  if(!state.clients.length)state.clients=[...demoClients];
-  save();render("dashboard");
-}else{
-  $("#onboardingModal").classList.remove("hidden");
-}
+// TEST MODE: skip onboarding and open the dashboard immediately.
+$("#onboardingModal")?.classList.add("hidden");
+if(!state.profile)state.profile={...demoProfile};
+if(!state.transactions.length)state.transactions=[...demoTransactions];
+if(!state.clients.length)state.clients=[...demoClients];
+save();
+render("dashboard");
