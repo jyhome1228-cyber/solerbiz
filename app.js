@@ -116,7 +116,7 @@ function pageDashboard(){
           <div class="card-head"><h3>빠른 도구</h3><span>자주 쓰는 기능</span></div>
           <div class="quick-cards">
             <button class="quick-card" data-open-quick><strong>거래 등록</strong><span>매출·매입 기록</span></button>
-            <button class="quick-card" data-go="calculator"><strong>3.3% 계산</strong><span>지급액 바로 계산</span></button>
+            <button class="quick-card" data-calc-open="withhold"><strong>3.3% 계산</strong><span>지급액 바로 계산</span></button>
             <button class="quick-card" data-go="clients"><strong>거래처</strong><span>미수금 확인</span></button>
           </div>
         </div>
@@ -179,21 +179,127 @@ function pageDocuments(){
     ${["세금계산서","계약서","견적서 · 거래명세서","사업자등록증","인력 지급자료","기타 문서"].map((x,i)=>`<div class="quick-card"><strong>${x}</strong><span>${i===0?'3개 파일':'아직 등록된 파일 없음'}</span></div>`).join("")}
   </div><div class="notice" style="margin-top:14px">테스트 버전에서는 문서 분류 UI만 구성되어 있습니다. 실제 파일 저장은 Firebase/Supabase 또는 별도 스토리지 연결 단계에서 구현합니다.</div>`;
 }
+let currentCalculator=null;
+let vatMode="supply";
+let withholdMode="gross";
+
+const calculatorItems=[
+  {id:"vat",title:"부가세 계산",desc:"공급가액 또는 합계금액을 기준으로 부가세를 계산합니다.",meta:"정방향 · 역산"},
+  {id:"withhold",title:"3.3% 원천징수",desc:"지급총액과 실수령액을 서로 계산하고 세액을 나눠 확인합니다.",meta:"소득세 3% + 지방소득세 0.3%"},
+  {id:"margin",title:"마진 계산",desc:"매출액과 비용을 기준으로 이익과 마진율을 계산합니다.",meta:"수익성 확인"},
+  {id:"hourly",title:"프로젝트 단가",desc:"프로젝트 금액과 투입시간을 기준으로 시간당 단가를 계산합니다.",meta:"작업 효율 확인"}
+];
+
 function pageCalculator(){
-  return `
-  <div class="section-title"><div><p class="eyebrow">CALCULATORS</p><h2>사업 계산기</h2></div></div>
-  <div class="calculator-grid">
-    ${calcCard("vat","부가세 계산","공급가액을 입력하면 부가세와 합계를 계산합니다.","공급가액")}
-    ${calcCard("withhold","3.3% 계산","지급 총액을 기준으로 원천징수액과 실수령액을 계산합니다.","지급 총액")}
-    ${calcCard("margin","마진 계산","매출과 비용을 기준으로 단순 마진율을 계산합니다.","매출액","비용")}
-    ${calcCard("hourly","프로젝트 시급","프로젝트 금액과 투입 시간을 기준으로 시간당 금액을 봅니다.","프로젝트 금액","투입 시간")}
-  </div>`;
+  if(!currentCalculator)return calculatorHome();
+  if(currentCalculator==="vat")return vatCalculator();
+  if(currentCalculator==="withhold")return withholdCalculator();
+  if(currentCalculator==="margin")return marginCalculator();
+  if(currentCalculator==="hourly")return hourlyCalculator();
+  currentCalculator=null;
+  return calculatorHome();
 }
-function calcCard(type,title,desc,label1,label2=""){
-  return `<div class="card calc-card" data-calc="${type}"><div class="card-head"><h3>${title}</h3></div><p style="font-size:10px;color:var(--muted);margin-top:-5px">${desc}</p>
-  <label>${label1}<input type="number" data-a min="0" placeholder="0"></label>
-  ${label2?`<label style="margin-top:9px">${label2}<input type="number" data-b min="0" placeholder="0"></label>`:""}
-  <div class="calc-result"><span>계산 결과</span><strong data-result>₩0</strong></div></div>`;
+function calculatorHome(){
+  return `
+    <div class="section-title calculator-title">
+      <div><p class="eyebrow">CALCULATORS</p><h2>필요한 계산기를 선택하세요.</h2>
+      <p class="section-desc">한 화면에 모든 계산식을 펼치지 않고, 필요한 계산만 선택해서 자세히 확인합니다.</p></div>
+    </div>
+    <div class="calculator-menu">
+      ${calculatorItems.map((item,index)=>`
+        <button class="calculator-menu-card" data-calculator="${item.id}">
+          <div class="calculator-menu-icon">${String(index+1).padStart(2,"0")}</div>
+          <div class="calculator-menu-copy">
+            <strong>${item.title}</strong>
+            <p>${item.desc}</p>
+            <span>${item.meta}</span>
+          </div>
+          <div class="calculator-menu-arrow">→</div>
+        </button>`).join("")}
+    </div>`;
+}
+function calculatorDetailHeader(kicker,title,desc){
+  return `
+    <div class="calculator-detail-head">
+      <button class="calc-back" id="calcBack">← 계산기 목록</button>
+      <p class="eyebrow">${kicker}</p>
+      <h2>${title}</h2>
+      <p>${desc}</p>
+    </div>`;
+}
+function vatCalculator(){
+  return `
+    ${calculatorDetailHeader("VAT CALCULATOR","부가세 계산","금액을 알고 있는 방향에 맞춰 계산할 수 있습니다.")}
+    <div class="calculator-detail-card" data-detail-calc="vat">
+      <div class="calc-mode-tabs">
+        <button class="${vatMode==="supply"?"active":""}" data-vat-mode="supply">공급가액으로 계산</button>
+        <button class="${vatMode==="total"?"active":""}" data-vat-mode="total">합계금액으로 역산</button>
+      </div>
+      <div class="calc-form-large">
+        <label>
+          <span>${vatMode==="supply"?"공급가액":"부가세 포함 합계금액"}</span>
+          <div class="money-input"><input type="number" min="0" step="1" inputmode="numeric" data-a placeholder="0"><b>원</b></div>
+        </label>
+      </div>
+      <div class="calc-breakdown" aria-live="polite">
+        <div><span>공급가액</span><strong data-vat-supply>₩0</strong></div>
+        <div><span>부가세</span><strong data-vat-tax>₩0</strong></div>
+        <div class="total"><span>합계금액</span><strong data-vat-total>₩0</strong></div>
+      </div>
+      <p class="calc-help">${vatMode==="supply"?"공급가액의 10%를 부가세로 계산합니다.":"입력한 합계금액을 1.1로 나누어 공급가액과 부가세를 역산합니다."}</p>
+    </div>`;
+}
+function withholdCalculator(){
+  return `
+    ${calculatorDetailHeader("WITHHOLDING TAX","3.3% 원천징수 계산","지급 전 금액과 실제 입금액 어느 쪽에서도 계산할 수 있습니다.")}
+    <div class="calculator-detail-card" data-detail-calc="withhold">
+      <div class="calc-mode-tabs">
+        <button class="${withholdMode==="gross"?"active":""}" data-withhold-mode="gross">지급총액 기준</button>
+        <button class="${withholdMode==="net"?"active":""}" data-withhold-mode="net">실수령액 기준 역산</button>
+      </div>
+      <div class="calc-form-large">
+        <label>
+          <span>${withholdMode==="gross"?"세전 지급총액":"실제 실수령액"}</span>
+          <div class="money-input"><input type="number" min="0" step="1" inputmode="numeric" data-a placeholder="0"><b>원</b></div>
+        </label>
+      </div>
+      <div class="calc-breakdown four" aria-live="polite">
+        <div><span>세전 지급총액</span><strong data-wh-gross>₩0</strong></div>
+        <div><span>소득세 3%</span><strong data-wh-income>₩0</strong></div>
+        <div><span>지방소득세 0.3%</span><strong data-wh-local>₩0</strong></div>
+        <div class="total"><span>실수령액</span><strong data-wh-net>₩0</strong></div>
+      </div>
+      <p class="calc-help">일반적인 3.3% 원천징수 단순 계산용입니다. 실제 신고 시 원단위 처리 등으로 차이가 생길 수 있습니다.</p>
+    </div>`;
+}
+function marginCalculator(){
+  return `
+    ${calculatorDetailHeader("MARGIN CALCULATOR","마진 계산","매출에서 직접 비용을 제외한 이익과 마진율을 확인합니다.")}
+    <div class="calculator-detail-card" data-detail-calc="margin">
+      <div class="calc-form-grid">
+        <label><span>매출액</span><div class="money-input"><input type="number" min="0" step="1" data-a placeholder="0"><b>원</b></div></label>
+        <label><span>비용</span><div class="money-input"><input type="number" min="0" step="1" data-b placeholder="0"><b>원</b></div></label>
+      </div>
+      <div class="calc-breakdown">
+        <div><span>매출액</span><strong data-margin-sales>₩0</strong></div>
+        <div><span>비용</span><strong data-margin-cost>₩0</strong></div>
+        <div class="total"><span>이익 / 마진율</span><strong data-margin-result>₩0 · 0%</strong></div>
+      </div>
+    </div>`;
+}
+function hourlyCalculator(){
+  return `
+    ${calculatorDetailHeader("PROJECT RATE","프로젝트 단가 계산","프로젝트 금액을 실제 투입시간으로 나눠 작업 효율을 확인합니다.")}
+    <div class="calculator-detail-card" data-detail-calc="hourly">
+      <div class="calc-form-grid">
+        <label><span>프로젝트 금액</span><div class="money-input"><input type="number" min="0" step="1" data-a placeholder="0"><b>원</b></div></label>
+        <label><span>총 투입시간</span><div class="money-input"><input type="number" min="0" step="0.5" data-b placeholder="0"><b>시간</b></div></label>
+      </div>
+      <div class="calc-breakdown two">
+        <div><span>총 프로젝트 금액</span><strong data-hour-total>₩0</strong></div>
+        <div class="total"><span>시간당 단가</span><strong data-hour-rate>₩0</strong></div>
+      </div>
+    </div>`;
 }
 function pageSettings(){
   const p=state.profile;
@@ -236,17 +342,83 @@ function bindDynamic(){
     e.preventDefault(); const f=new FormData(e.currentTarget);
     state.profile={...state.profile,businessName:f.get("businessName"),ownerName:f.get("ownerName"),businessType:f.get("businessType"),taxType:f.get("taxType"),industry:f.get("industry"),startDate:f.get("startDate"),hasEmployee:f.get("hasEmployee")==="on",hasFreelancer:f.get("hasFreelancer")==="on"}; save(); updateIdentity(); render("settings");
   });
-  $$("[data-calc]").forEach(card=>{
-    const inputs=card.querySelectorAll("input"); inputs.forEach(i=>i.addEventListener("input",()=>runCalc(card)));
+  $("[data-calculator]").forEach(btn=>btn.addEventListener("click",()=>{
+    currentCalculator=btn.dataset.calculator;
+    render("calculator");
+  }));
+  $("[data-calc-open]").forEach(btn=>btn.addEventListener("click",()=>{
+    currentCalculator=btn.dataset.calcOpen;
+    render("calculator");
+  }));
+  $("#calcBack")?.addEventListener("click",()=>{
+    currentCalculator=null;
+    render("calculator");
   });
+  $("[data-vat-mode]").forEach(btn=>btn.addEventListener("click",()=>{
+    vatMode=btn.dataset.vatMode;
+    render("calculator");
+  }));
+  $("[data-withhold-mode]").forEach(btn=>btn.addEventListener("click",()=>{
+    withholdMode=btn.dataset.withholdMode;
+    render("calculator");
+  }));
+  $("[data-detail-calc] input").forEach(input=>input.addEventListener("input",()=>{
+    runDetailedCalculator(input.closest("[data-detail-calc]"));
+  }));
 }
-function runCalc(card){
-  const type=card.dataset.calc,a=Number(card.querySelector("[data-a]")?.value||0),b=Number(card.querySelector("[data-b]")?.value||0); let result="";
-  if(type==="vat")result=`부가세 ${won(a*.1)} · 합계 ${won(a*1.1)}`;
-  if(type==="withhold")result=`원천징수 ${won(a*.033)} · 실수령 ${won(a*.967)}`;
-  if(type==="margin")result=b&&a?`${((a-b)/a*100).toFixed(1)}% · 잔액 ${won(a-b)}`:"0%";
-  if(type==="hourly")result=b?`${won(a/b)} / 시간`:"₩0";
-  card.querySelector("[data-result]").textContent=result;
+function runDetailedCalculator(card){
+  const type=card.dataset.detailCalc;
+  const a=Math.max(0,Number(card.querySelector("[data-a]")?.value||0));
+  const b=Math.max(0,Number(card.querySelector("[data-b]")?.value||0));
+
+  if(type==="vat"){
+    let supply=0,tax=0,total=0;
+    if(vatMode==="supply"){
+      supply=Math.round(a);
+      tax=Math.round(supply*.1);
+      total=supply+tax;
+    }else{
+      total=Math.round(a);
+      supply=Math.round(total/1.1);
+      tax=total-supply;
+    }
+    card.querySelector("[data-vat-supply]").textContent=won(supply);
+    card.querySelector("[data-vat-tax]").textContent=won(tax);
+    card.querySelector("[data-vat-total]").textContent=won(total);
+  }
+
+  if(type==="withhold"){
+    let gross=0,income=0,local=0,net=0;
+    if(withholdMode==="gross"){
+      gross=Math.round(a);
+      income=Math.round(gross*.03);
+      local=Math.round(gross*.003);
+      net=gross-income-local;
+    }else{
+      net=Math.round(a);
+      gross=Math.round(net/.967);
+      income=Math.round(gross*.03);
+      local=gross-net-income;
+    }
+    card.querySelector("[data-wh-gross]").textContent=won(gross);
+    card.querySelector("[data-wh-income]").textContent=won(income);
+    card.querySelector("[data-wh-local]").textContent=won(local);
+    card.querySelector("[data-wh-net]").textContent=won(net);
+  }
+
+  if(type==="margin"){
+    const profit=a-b;
+    const rate=a>0?(profit/a*100):0;
+    card.querySelector("[data-margin-sales]").textContent=won(a);
+    card.querySelector("[data-margin-cost]").textContent=won(b);
+    card.querySelector("[data-margin-result]").textContent=`${won(profit)} · ${rate.toFixed(1)}%`;
+  }
+
+  if(type==="hourly"){
+    const rate=b>0?a/b:0;
+    card.querySelector("[data-hour-total]").textContent=won(a);
+    card.querySelector("[data-hour-rate]").textContent=b>0?`${won(rate)} / 시간`:"₩0";
+  }
 }
 function openQuick(){
   $("#quickModal").classList.remove("hidden");
