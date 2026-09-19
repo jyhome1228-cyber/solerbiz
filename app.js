@@ -324,7 +324,7 @@ function render(page=currentPage){
   currentPage=page;
   $("#pageTitle").textContent=pages[page][0];
   $("#content").innerHTML=pages[page][1]();
-  $$(".nav-item[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+  $$$(".nav-item[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
   bindDynamic();
   updateIdentity();
 }
@@ -342,11 +342,11 @@ function bindDynamic(){
     e.preventDefault(); const f=new FormData(e.currentTarget);
     state.profile={...state.profile,businessName:f.get("businessName"),ownerName:f.get("ownerName"),businessType:f.get("businessType"),taxType:f.get("taxType"),industry:f.get("industry"),startDate:f.get("startDate"),hasEmployee:f.get("hasEmployee")==="on",hasFreelancer:f.get("hasFreelancer")==="on"}; save(); updateIdentity(); render("settings");
   });
-  $("[data-calculator]").forEach(btn=>btn.addEventListener("click",()=>{
+  $$("[data-calculator]").forEach(btn=>btn.addEventListener("click",()=>{
     currentCalculator=btn.dataset.calculator;
     render("calculator");
   }));
-  $("[data-calc-open]").forEach(btn=>btn.addEventListener("click",()=>{
+  $$("[data-calc-open]").forEach(btn=>btn.addEventListener("click",()=>{
     currentCalculator=btn.dataset.calcOpen;
     render("calculator");
   }));
@@ -354,15 +354,15 @@ function bindDynamic(){
     currentCalculator=null;
     render("calculator");
   });
-  $("[data-vat-mode]").forEach(btn=>btn.addEventListener("click",()=>{
+  $$("[data-vat-mode]").forEach(btn=>btn.addEventListener("click",()=>{
     vatMode=btn.dataset.vatMode;
     render("calculator");
   }));
-  $("[data-withhold-mode]").forEach(btn=>btn.addEventListener("click",()=>{
+  $$("[data-withhold-mode]").forEach(btn=>btn.addEventListener("click",()=>{
     withholdMode=btn.dataset.withholdMode;
     render("calculator");
   }));
-  $("[data-detail-calc] input").forEach(input=>input.addEventListener("input",()=>{
+  $$("[data-detail-calc] input").forEach(input=>input.addEventListener("input",()=>{
     runDetailedCalculator(input.closest("[data-detail-calc]"));
   }));
 }
@@ -425,7 +425,7 @@ function openQuick(){
   $("#quickForm [name=date]").value=new Date().toISOString().slice(0,10);
 }
 
-$(".nav-item[data-page]").forEach(btn=>btn.addEventListener("click",()=>{
+$$(".nav-item[data-page]").forEach(btn=>btn.addEventListener("click",()=>{
   if(btn.dataset.page==="calculator")currentCalculator=null;
   render(btn.dataset.page);
 }));
