@@ -1,7 +1,7 @@
 const $=(s)=>document.querySelector(s);
 const $$=(s)=>[...document.querySelectorAll(s)];
 const KRW=new Intl.NumberFormat("ko-KR",{style:"currency",currency:"KRW",maximumFractionDigits:0});
-const AUTH_USER=window.SOLER_BIZ_USER||{id:"anonymous",email:""};
+const AUTH_USER=window.SOLAR_BIZ_USER||{id:"anonymous",email:""};
 const STORAGE_PREFIX=`solerbiz.${AUTH_USER.id}`;
 const storageKey=(name)=>`${STORAGE_PREFIX}.${name}`;
 
