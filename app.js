@@ -1019,7 +1019,7 @@ function bindDynamic(){
     e.preventDefault(); const f=new FormData(e.currentTarget);
     state.profile={...state.profile,businessName:f.get("businessName"),ownerName:f.get("ownerName"),businessNumber:f.get("businessNumber")||state.profile.businessNumber||"",address:f.get("address")||state.profile.address||"",businessType:f.get("businessType"),taxType:f.get("taxType"),industry:f.get("industry"),startDate:f.get("startDate"),hasEmployee:f.get("hasEmployee")==="on",hasFreelancer:f.get("hasFreelancer")==="on",hasDailyWorker:f.get("hasDailyWorker")==="on",salesChannel:f.get("salesChannel")||state.profile.salesChannel||"둘 다"}; save(); updateIdentity(); render("settings");
   });
-  $("[data-finance-tab]").forEach(btn=>btn.addEventListener("click",()=>{
+  $$("[data-finance-tab]").forEach(btn=>btn.addEventListener("click",()=>{
     financeTab=btn.dataset.financeTab||"records";
     render("finance");
   }));
@@ -1030,16 +1030,16 @@ function bindDynamic(){
     ["dragleave","drop"].forEach(type=>invoiceDrop.addEventListener(type,e=>{e.preventDefault();invoiceDrop.classList.remove("is-dragover")}));
     invoiceDrop.addEventListener("drop",e=>handleTaxInvoiceFiles(e.dataTransfer?.files||[]));
   }
-  $("[data-tax-draft-field]").forEach(input=>{
+  $$("[data-tax-draft-field]").forEach(input=>{
     const event=input.tagName==="SELECT"?"change":"input";
     input.addEventListener(event,()=>updateTaxInvoiceDraft(input.dataset.taxDraftId,input.dataset.taxDraftField,input.value));
   });
-  $("[data-tax-draft-save]").forEach(btn=>btn.addEventListener("click",()=>saveTaxInvoiceDraft(btn.dataset.taxDraftSave)));
-  $("[data-tax-draft-remove]").forEach(btn=>btn.addEventListener("click",()=>{
+  $$("[data-tax-draft-save]").forEach(btn=>btn.addEventListener("click",()=>saveTaxInvoiceDraft(btn.dataset.taxDraftSave)));
+  $$("[data-tax-draft-remove]").forEach(btn=>btn.addEventListener("click",()=>{
     taxInvoiceDrafts=taxInvoiceDrafts.filter(x=>String(x.id)!==String(btn.dataset.taxDraftRemove));
     render("finance");
   }));
-  $("[data-calculator]").forEach(btn=>btn.addEventListener("click",()=>{
+  $$("[data-calculator]").forEach(btn=>btn.addEventListener("click",()=>{
     currentCalculator=btn.dataset.calculator;
     render("calculator");
   }));
@@ -1059,10 +1059,10 @@ function bindDynamic(){
     withholdMode=btn.dataset.withholdMode;
     render("calculator");
   }));
-  $("[data-detail-calc] input").forEach(input=>input.addEventListener("input",()=>{
+  $$("[data-detail-calc] input").forEach(input=>input.addEventListener("input",()=>{
     runDetailedCalculator(input.closest("[data-detail-calc]"));
   }));
-  $("[data-tax-guide]").forEach(btn=>btn.addEventListener("click",()=>{
+  $$("[data-tax-guide]").forEach(btn=>btn.addEventListener("click",()=>{
     selectedTaxGuide=btn.dataset.taxGuide;
     render("tax");
   }));
