@@ -127,13 +127,22 @@ function deadlines(){
   if(p.hasFreelancer){
     items.push(deadlineItem("freelancer-report",monthEndAfterNow(),"3.3% 지급명세 자료","사업소득 간이지급명세서 제출 일정 확인"));
   }
+  if(p.hasEmployee){
+    items.push(deadlineItem("social-insurance",nextMonthlyDay(10),"4대보험료 확인","직원 보험료 고지·납부 상태 확인"));
+  }
   if(p.taxType==="면세사업자"){
     items.push(deadlineItem("business-status",nextFixedDate(2,10),"사업장현황신고","면세사업자 신고자료 준비"));
   }else if(p.taxType==="간이과세자"){
     items.push(deadlineItem("vat",nextFixedDate(1,25),"부가가치세 신고","간이과세자 연간 신고 일정 확인"));
   }else{
-    const jan=nextFixedDate(1,25), jul=nextFixedDate(7,25);
-    items.push(deadlineItem("vat",jan<jul?jan:jul,"부가가치세 신고","일반과세자 확정신고 일정 확인"));
+    const candidates=[
+      {date:nextFixedDate(1,25),title:"부가가치세 확정신고",desc:"일반과세자 확정신고 일정 확인"},
+      {date:nextFixedDate(4,25),title:"부가가치세 중간 확인",desc:"예정고지·예정신고 대상 여부 확인"},
+      {date:nextFixedDate(7,25),title:"부가가치세 확정신고",desc:"일반과세자 확정신고 일정 확인"},
+      {date:nextFixedDate(10,25),title:"부가가치세 중간 확인",desc:"예정고지·예정신고 대상 여부 확인"}
+    ].sort((a,b)=>a.date-b.date);
+    const nextVat=candidates[0];
+    items.push(deadlineItem("vat",nextVat.date,nextVat.title,nextVat.desc));
   }
   if(p.businessType==="개인사업자"){
     items.push(deadlineItem("income-tax",nextFixedDate(5,31),"종합소득세 · 개인지방소득세","전년도 소득과 필요경비 자료를 기준으로 준비"));
