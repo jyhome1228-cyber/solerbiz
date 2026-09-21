@@ -2239,3 +2239,152 @@ body[data-auth-context="dashboard"] .nav-item.active .nav-icon{
   margin-top:auto;
   margin-bottom:8px;
 }
+
+
+/* Product polish — sync analytics and branded cards */
+.sync-status{
+  position:relative;
+  padding-left:12px;
+  color:#8992a2;
+  font-size:9px;
+  white-space:nowrap;
+}
+.sync-status:before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:50%;
+  width:6px;
+  height:6px;
+  margin-top:-3px;
+  border-radius:50%;
+  background:#b7bec9;
+}
+.sync-status[data-state="ok"]:before{background:#20a36a}
+.sync-status[data-state="saving"]:before{background:#f2a93b}
+.sync-status[data-state="error"]:before{background:#e35c64}
+.sync-status[data-state="local"]:before{background:#8b95a5}
+
+body[data-auth-context="dashboard"] .analytics-metrics{
+  margin-bottom:12px;
+}
+body[data-auth-context="dashboard"] .analytics-list{
+  display:grid;
+  gap:15px;
+}
+body[data-auth-context="dashboard"] .analytics-row>div:first-child{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:7px;
+}
+body[data-auth-context="dashboard"] .analytics-row strong{
+  font-size:10px;
+}
+body[data-auth-context="dashboard"] .analytics-row span{
+  color:#808999;
+  font:600 10px Inter,sans-serif;
+}
+body[data-auth-context="dashboard"] .analytics-bar{
+  height:6px;
+  overflow:hidden;
+  border-radius:3px;
+  background:#eef1f5;
+}
+body[data-auth-context="dashboard"] .analytics-bar i{
+  display:block;
+  height:100%;
+  min-width:4px;
+  border-radius:3px;
+  background:#1650f6;
+}
+body[data-auth-context="dashboard"] .analytics-summary dl{
+  margin:0;
+  display:grid;
+}
+body[data-auth-context="dashboard"] .analytics-summary dl>div{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 0;
+  border-bottom:1px solid #eef0f4;
+}
+body[data-auth-context="dashboard"] .analytics-summary dl>div:last-child{
+  border-bottom:0;
+}
+body[data-auth-context="dashboard"] .analytics-summary dt{
+  color:#7b8495;
+  font-size:10px;
+}
+body[data-auth-context="dashboard"] .analytics-summary dd{
+  margin:0;
+  font:700 12px Inter,sans-serif;
+}
+body[data-auth-context="dashboard"] .analytics-tip{
+  margin:0;
+  color:#707a8d;
+  font-size:10px;
+  line-height:1.8;
+}
+
+/* Branded public cards */
+.marketing-icon{
+  width:46px;
+  height:46px;
+  object-fit:contain;
+  display:block;
+  margin-bottom:18px;
+}
+.pricing-plan-icon{
+  width:42px;
+  height:42px;
+  object-fit:contain;
+  display:block;
+  margin-bottom:18px;
+}
+.public-calc-icon{
+  width:44px;
+  height:44px;
+  object-fit:contain;
+  display:block;
+}
+.contact-page-icon{
+  width:48px;
+  height:48px;
+  object-fit:contain;
+  display:block;
+  margin-bottom:20px;
+}
+.pricing-card,
+.feature-detail,
+.public-calc-card,
+.contact-form,
+.contact-page-note{
+  transition:border-color .16s ease,background .16s ease,transform .16s ease;
+}
+.pricing-card:hover,
+.feature-detail:hover,
+.public-calc-card:hover{
+  border-color:#cbd6fb;
+}
+.pricing-card.featured:hover{
+  border-color:#9eb4ff;
+}
+.marketing-page a,
+.landing-page a,
+button{
+  -webkit-tap-highlight-color:transparent;
+}
+.marketing-page a:focus-visible,
+.landing-page a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible{
+  outline:2px solid rgba(22,80,246,.42);
+  outline-offset:2px;
+}
+@media(max-width:700px){
+  .sync-status{display:none}
+}
