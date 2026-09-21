@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Solarbiz. 로그인" />
+  <title>로그인 — Solarbiz.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link rel="icon" type="image/svg+xml" href="../assets/solarbiz-symbol.svg" />
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body class="auth-pending" data-auth-context="login">
+  <section class="auth-gate hidden" id="authGate" aria-label="로그인">
+    <div class="auth-panel">
+      <a class="auth-home-link" href="../">← Solarbiz. 소개로</a>
+      <div class="auth-brand">
+        <img class="brand-logo brand-logo-auth" src="../assets/solarbiz-logo.svg" alt="Solarbiz." />
+        <div>
+          <h1 id="authTitle">다시 만나서 반가워요.</h1>
+          <p>로그인하면 내 사업자 데이터와 운영 대시보드로 이동합니다.</p>
+        </div>
+      </div>
+
+      <form id="authForm" class="auth-form">
+        <label>이메일
+          <input id="authEmail" name="email" type="email" autocomplete="email" placeholder="name@example.com" required />
+        </label>
+        <label>비밀번호
+          <input id="authPassword" name="password" type="password" autocomplete="current-password" minlength="8" placeholder="8자 이상" required />
+        </label>
+        <p class="auth-message" id="authMessage" aria-live="polite"></p>
+        <button type="submit" class="primary-btn auth-primary"><span id="authSubmitLabel">로그인</span></button>
+        <button type="button" class="ghost-btn auth-secondary" id="authSignUp">처음이라면 회원가입</button>
+        <button type="button" class="ghost-btn auth-preview" id="authPreview" hidden>개발 미리보기로 시작</button>
+      </form>
+      <p class="auth-footnote">Firebase Authentication으로 계정을 관리합니다.</p>
+    </div>
+  </section>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="../config.js"></script>
+  <script src="../auth.js"></script>
+</body>
+</html>
