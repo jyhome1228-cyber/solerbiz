@@ -651,6 +651,8 @@ function runDetailedCalculator(card){
 function openQuick(){
   $("#quickModal").classList.remove("hidden");
   $("#quickForm [name=date]").value=localDateInputValue();
+  const taxable=$("#quickForm [name=taxable]");
+  if(taxable)taxable.value=state.profile?.taxType==="면세사업자"?"exempt":"taxable";
 }
 
 $$(".nav-item[data-page]").forEach(btn=>btn.addEventListener("click",()=>{
