@@ -18,9 +18,9 @@
       <img src="./assets/solarbiz-logo.svg" alt="Solarbiz." />
     </a>
     <nav class="landing-nav" aria-label="랜딩 메뉴">
-      <a href="#features">기능</a>
-      <a href="#flow">운영 흐름</a>
-      <a href="#tools">계산기</a>
+      <a href="#features">주요 기능</a>
+      <a href="#pricing">요금제</a>
+      <a href="#contact">도입문의</a>
     </nav>
     <div class="landing-actions">
       <a class="landing-login" href="./login/">로그인</a>
@@ -117,6 +117,104 @@
       </div>
     </section>
 
+    <section class="landing-section landing-pricing-section" id="pricing">
+      <div class="landing-section-head">
+        <p class="landing-kicker">PRICING</p>
+        <h2>사업 규모에 맞게 시작하세요.</h2>
+        <p class="landing-section-copy">현재 베타 단계의 요금 구성안입니다. 정식 출시 전 기능과 요금은 조정될 수 있습니다.</p>
+      </div>
+
+      <div class="pricing-grid">
+        <article class="pricing-card">
+          <div class="pricing-head">
+            <span class="pricing-label">FREE</span>
+            <h3>가볍게 시작</h3>
+            <p>사업 운영의 기본 흐름을 정리하고 싶은 1인사업자</p>
+          </div>
+          <div class="pricing-price"><strong>0원</strong><span>/ 월</span></div>
+          <ul>
+            <li>사업자 1개</li>
+            <li>클라이언트 · 프로젝트 관리</li>
+            <li>매출 · 비용 기록</li>
+            <li>VAT · 3.3% 계산기</li>
+            <li>기본 세금 일정</li>
+          </ul>
+          <a class="pricing-button secondary" href="./login/?mode=signup">무료로 시작하기</a>
+        </article>
+
+        <article class="pricing-card featured">
+          <div class="pricing-badge">추천</div>
+          <div class="pricing-head">
+            <span class="pricing-label">SOLO PRO</span>
+            <h3>운영까지 자동으로</h3>
+            <p>세금·인력·미수금까지 체계적으로 관리하고 싶은 사업자</p>
+          </div>
+          <div class="pricing-price"><strong>월 9,900원</strong><span> 예정</span></div>
+          <ul>
+            <li>FREE의 모든 기능</li>
+            <li>3.3% 인력 · 급여 관리</li>
+            <li>세금 리마인드 · Tax Task</li>
+            <li>미수금 · 입금 예정 관리</li>
+            <li>문서 보관 · 데이터 백업</li>
+          </ul>
+          <a class="pricing-button primary" href="./login/?mode=signup">베타 시작하기</a>
+        </article>
+
+        <article class="pricing-card">
+          <div class="pricing-head">
+            <span class="pricing-label">BUSINESS</span>
+            <h3>팀과 사업을 함께</h3>
+            <p>여러 사업자·팀원을 함께 관리하거나 맞춤 구성이 필요한 경우</p>
+          </div>
+          <div class="pricing-price"><strong>도입문의</strong></div>
+          <ul>
+            <li>복수 사업자 관리</li>
+            <li>팀원 · 권한 관리</li>
+            <li>고급 리포트</li>
+            <li>데이터 이전 지원</li>
+            <li>맞춤형 도입 지원</li>
+          </ul>
+          <a class="pricing-button secondary" href="#contact">도입 상담하기</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="landing-section contact-section" id="contact">
+      <div class="contact-copy">
+        <p class="landing-kicker">CONTACT</p>
+        <h2>Solarbiz. 도입이 궁금하신가요?</h2>
+        <p>현재 운영 방식과 필요한 기능을 남겨주시면 도입 범위와 적합한 구성을 확인할 수 있도록 준비합니다.</p>
+        <div class="contact-meta">
+          <span>운영</span>
+          <strong>AESOST TECHNOLOGY</strong>
+        </div>
+      </div>
+
+      <form class="contact-form" id="inquiryForm">
+        <div class="contact-form-grid">
+          <label>이름
+            <input name="name" type="text" placeholder="이름" required>
+          </label>
+          <label>회사 / 상호
+            <input name="company" type="text" placeholder="회사 또는 상호">
+          </label>
+          <label>이메일
+            <input name="email" type="email" placeholder="name@example.com" required>
+          </label>
+          <label>연락처
+            <input name="phone" type="text" placeholder="선택 입력">
+          </label>
+        </div>
+        <label>문의 내용
+          <textarea name="message" rows="5" placeholder="현재 관리 방식이나 필요한 기능을 간단히 적어주세요." required></textarea>
+        </label>
+        <div class="contact-form-footer">
+          <p id="inquiryStatus" aria-live="polite"></p>
+          <button type="submit" class="landing-cta">도입문의 보내기</button>
+        </div>
+      </form>
+    </section>
+
     <section class="landing-final">
       <img src="./assets/solarbiz-symbol.svg" alt="" />
       <div>
@@ -127,9 +225,42 @@
     </section>
   </main>
 
-  <footer class="landing-footer">
-    <img src="./assets/solarbiz-logo.svg" alt="Solarbiz." />
-    <span>1인사업자를 위한 Business OS</span>
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <div class="footer-brand">
+        <img src="./assets/solarbiz-logo.svg" alt="Solarbiz." />
+        <p>1인사업자의 고객, 프로젝트, 매출, 세금과 인력을 한 곳에서 관리하는 Business OS.</p>
+        <strong>AESOST TECHNOLOGY</strong>
+      </div>
+
+      <div class="footer-column">
+        <span>제품</span>
+        <a href="#features">주요 기능</a>
+        <a href="#flow">운영 흐름</a>
+        <a href="#tools">계산기</a>
+        <a href="#pricing">요금제</a>
+      </div>
+
+      <div class="footer-column">
+        <span>지원</span>
+        <a href="#contact">도입문의</a>
+        <a href="./login/">로그인</a>
+        <a href="./login/?mode=signup">회원가입</a>
+      </div>
+
+      <div class="footer-column">
+        <span>약관</span>
+        <a href="./privacy/">개인정보처리방침</a>
+        <a href="./terms/">서비스 이용약관</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 AESOST TECHNOLOGY. All rights reserved.</span>
+      <span>Solarbiz.</span>
+    </div>
   </footer>
+
+  <script src="./landing.js"></script>
 </body>
 </html>
