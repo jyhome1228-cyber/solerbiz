@@ -124,8 +124,14 @@
       return;
     }
 
-    client.auth.onAuthStateChange((_event,session)=>{
-      if(session?.user&&!appLoaded)loadApp(session.user);
+    client.auth.onAuthStateChange((event,session)=>{
+      if(session?.user&&!appLoaded){
+        loadApp(session.user);
+        return;
+      }
+      if(!session&&appLoaded&&event==="SIGNED_OUT"){
+        location.reload();
+      }
     });
   }
 
