@@ -1154,3 +1154,100 @@ body[data-auth-context="dashboard"] .modal.compact{
     font-size:12px;
   }
 }
+
+
+/* Landing section bands + header stroke */
+.landing-page{
+  background:#f4f6fb;
+}
+.landing-page .landing-header{
+  position:relative;
+  background:#fff;
+  box-shadow:0 0 0 100vmax #fff;
+  clip-path:inset(0 -100vmax);
+}
+.landing-page .landing-header:after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:0;
+  width:100vw;
+  height:1px;
+  transform:translateX(-50%);
+  background:#e7e9ee;
+}
+.landing-page .landing-hero{
+  margin-top:0;
+  margin-bottom:0;
+  padding-top:72px;
+  padding-bottom:112px;
+  background:#fff;
+  box-shadow:0 0 0 100vmax #fff;
+  clip-path:inset(0 -100vmax);
+}
+.landing-page .landing-section{
+  margin-bottom:0;
+  padding-top:104px;
+  padding-bottom:104px;
+  position:relative;
+  clip-path:inset(0 -100vmax);
+}
+.landing-page #features{
+  background:#f4f6fb;
+  box-shadow:0 0 0 100vmax #f4f6fb;
+}
+.landing-page #flow{
+  background:#fff;
+  box-shadow:0 0 0 100vmax #fff;
+}
+.landing-page #tools{
+  background:#f4f6fb;
+  box-shadow:0 0 0 100vmax #f4f6fb;
+}
+.landing-page #pricing{
+  background:#fff;
+  box-shadow:0 0 0 100vmax #fff;
+}
+.landing-page #contact{
+  background:#f4f6fb;
+  box-shadow:0 0 0 100vmax #f4f6fb;
+}
+.landing-page .landing-flow-section{
+  border-radius:0;
+  padding-left:0;
+  padding-right:0;
+}
+.landing-page .landing-final{
+  margin-top:96px;
+  margin-bottom:96px;
+}
+.landing-page .landing-feature-card,
+.landing-page .pricing-card,
+.landing-page .contact-form,
+.landing-page .landing-tool-grid>div{
+  box-shadow:none;
+}
+@media(max-width:900px){
+  .landing-page .landing-hero{
+    padding-top:58px;
+    padding-bottom:92px;
+  }
+  .landing-page .landing-section{
+    padding-top:82px;
+    padding-bottom:82px;
+  }
+}
+@media(max-width:600px){
+  .landing-page .landing-hero{
+    padding-top:44px;
+    padding-bottom:72px;
+  }
+  .landing-page .landing-section{
+    padding-top:66px;
+    padding-bottom:66px;
+  }
+  .landing-page .landing-final{
+    margin-top:68px;
+    margin-bottom:68px;
+  }
+}
