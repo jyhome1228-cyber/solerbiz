@@ -493,10 +493,10 @@ let vatMode="supply";
 let withholdMode="gross";
 
 const calculatorItems=[
-  {id:"vat",title:"부가세 계산",desc:"공급가액 또는 합계금액을 기준으로 부가세를 계산합니다.",meta:"정방향 · 역산"},
-  {id:"withhold",title:"3.3% 원천징수",desc:"지급총액과 실수령액을 서로 계산하고 세액을 나눠 확인합니다.",meta:"소득세 3% + 지방소득세 0.3%"},
-  {id:"margin",title:"마진 계산",desc:"매출액과 비용을 기준으로 이익과 마진율을 계산합니다.",meta:"수익성 확인"},
-  {id:"hourly",title:"프로젝트 단가",desc:"프로젝트 금액과 투입시간을 기준으로 시간당 단가를 계산합니다.",meta:"작업 효율 확인"}
+  {id:"vat",title:"부가세 계산",desc:"공급가액 또는 합계금액을 기준으로 부가세를 계산합니다.",meta:"정방향 · 역산",icon:"tax.svg"},
+  {id:"withhold",title:"3.3% 원천징수",desc:"지급총액과 실수령액을 서로 계산하고 세액을 나눠 확인합니다.",meta:"소득세 3% + 지방소득세 0.3%",icon:"tax.svg"},
+  {id:"margin",title:"마진 계산",desc:"매출액과 비용을 기준으로 이익과 마진율을 계산합니다.",meta:"수익성 확인",icon:"analytics.svg"},
+  {id:"hourly",title:"프로젝트 단가",desc:"프로젝트 금액과 투입시간을 기준으로 시간당 단가를 계산합니다.",meta:"작업 효율 확인",icon:"workflow.svg"}
 ];
 
 function pageCalculator(){
@@ -517,7 +517,7 @@ function calculatorHome(){
     <div class="calculator-menu">
       ${calculatorItems.map((item,index)=>`
         <button class="calculator-menu-card" data-calculator="${item.id}">
-          <div class="calculator-menu-icon">${String(index+1).padStart(2,"0")}</div>
+          <div class="calculator-menu-icon"><img src="../assets/icons/${item.icon}" alt=""></div>
           <div class="calculator-menu-copy">
             <strong>${item.title}</strong>
             <p>${item.desc}</p>
