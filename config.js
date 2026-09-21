@@ -1,10 +1,15 @@
-window.SOLAR_BIZ_CONFIG = {
-  // Supabase Dashboard > Project Settings > API
-  // 브라우저에는 publishable/anon key만 넣습니다. service_role key는 절대 넣지 않습니다.
-  supabaseUrl: "",
-  supabaseAnonKey: "",
+window.SOLAR_BIZ_FIREBASE = {
+  // Firebase Console > Project settings > Your apps > Firebase SDK snippet
+  config: {
+    apiKey: "",
+    authDomain: "",
+    projectId: "",
+    storageBucket: "",
+    messagingSenderId: "",
+    appId: ""
+  },
 
-  // 개발 중에는 true로 두면 Supabase 연결 전에도 로컬 미리보기가 가능합니다.
-  // 실제 서비스 공개 전에는 반드시 false로 변경하세요.
+  // 개발 중 Firebase 연결 전 로컬 미리보기 허용.
+  // 실제 공개 전에는 false로 변경.
   allowLocalPreview: true
 };
