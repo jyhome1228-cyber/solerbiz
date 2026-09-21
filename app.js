@@ -25,13 +25,19 @@ const demoClients=[
   {name:"CLRX",category:"패키지 디자인",status:"검토중",receivable:750000},
   {name:"정월재",category:"브랜드 운영",status:"진행중",receivable:0}
 ];
+const demoProjects=[
+  {id:1,name:"건강미 운영",client:"건강미",amount:3500000,status:"진행중",dueDate:"2026-12-31"},
+  {id:2,name:"MYV 웹사이트",client:"MYV",amount:5000000,status:"진행중",dueDate:"2026-10-31"},
+  {id:3,name:"CLRX 패키지",client:"CLRX",amount:1500000,status:"검토중",dueDate:"2026-09-30"}
+];
 
 let state={
   profile:JSON.parse(localStorage.getItem("solerbiz.profile")||"null"),
   transactions:JSON.parse(localStorage.getItem("solerbiz.transactions")||"[]"),
   clients:JSON.parse(localStorage.getItem("solerbiz.clients")||"[]"),
+  projects:JSON.parse(localStorage.getItem("solerbiz.projects")||"[]"),
   tasks:JSON.parse(localStorage.getItem("solerbiz.tasks")||"null")||[
-    {id:1,text:"9월 매출 누락 여부 확인",done:false},
+    {id:1,text:"이번 달 매출 누락 여부 확인",done:false},
     {id:2,text:"3.3% 지급내역 정리",done:false},
     {id:3,text:"미수금 입금일 확인",done:true}
   ]
@@ -41,16 +47,28 @@ function save(){
   localStorage.setItem("solerbiz.profile",JSON.stringify(state.profile));
   localStorage.setItem("solerbiz.transactions",JSON.stringify(state.transactions));
   localStorage.setItem("solerbiz.clients",JSON.stringify(state.clients));
+  localStorage.setItem("solerbiz.projects",JSON.stringify(state.projects));
   localStorage.setItem("solerbiz.tasks",JSON.stringify(state.tasks));
 }
 function esc(v=""){return String(v).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function won(v){return KRW.format(Number(v||0))}
+function pad2(v){return String(v).padStart(2,"0")}
+function localDateInputValue(d=new Date()){return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`}
+function currentMonthKey(){
+  const d=new Date();
+  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
+}
+function monthShort(dateStr){
+  const m=Number(String(dateStr).slice(5,7));
+  return ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"][m-1]||"";
+}
 function getMonthData(){
-  const month="2026-09";
-  const list=state.transactions.filter(x=>x.date.startsWith(month));
+  const month=currentMonthKey();
+  const list=state.transactions.filter(x=>String(x.date||"").startsWith(month));
   const sales=list.filter(x=>x.type==="매출").reduce((a,b)=>a+Number(b.amount),0);
   const costs=list.filter(x=>x.type==="매입").reduce((a,b)=>a+Number(b.amount),0);
-  return {sales,costs,profit:sales-costs,list};
+  const [year,monthNo]=month.split("-").map(Number);
+  return {sales,costs,profit:sales-costs,list,year,monthNo,label:`${monthNo}월`};
 }
 function updateIdentity(){
   if(!state.profile)return;
@@ -64,16 +82,63 @@ function currentDate(){
 }
 $("#todayLabel").textContent=currentDate();
 
+function dateOnly(y,m,d){return new Date(y,m-1,d,12,0,0)}
+function nextFixedDate(month,day){
+  const now=new Date();
+  let y=now.getFullYear();
+  let d=dateOnly(y,month,day);
+  if(d < dateOnly(now.getFullYear(),now.getMonth()+1,now.getDate())) d=dateOnly(y+1,month,day);
+  return d;
+}
+function nextMonthlyDay(day){
+  const now=new Date();
+  let d=dateOnly(now.getFullYear(),now.getMonth()+1,day);
+  if(d < dateOnly(now.getFullYear(),now.getMonth()+1,now.getDate())) d=dateOnly(now.getFullYear(),now.getMonth()+2,day);
+  return d;
+}
+function monthEndAfterNow(){
+  const now=new Date();
+  return dateOnly(now.getFullYear(),now.getMonth()+2,0);
+}
+function daysUntil(d){
+  const now=new Date();
+  const a=dateOnly(now.getFullYear(),now.getMonth()+1,now.getDate());
+  return Math.max(0,Math.ceil((d-a)/86400000));
+}
+function deadlineItem(key,date,title,desc){
+  const left=daysUntil(date);
+  return {
+    key,
+    date,
+    display:`${pad2(date.getMonth()+1)}.${pad2(date.getDate())}`,
+    day:pad2(date.getDate()),
+    month:["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"][date.getMonth()],
+    title,
+    desc,
+    tag:left===0?"오늘":`D-${left}`
+  };
+}
 function deadlines(){
-  const items=[
-    {day:"10",month:"OCT",title:"원천세 신고 · 납부",desc:"3.3% 또는 직원 급여 지급 시 확인",tag:"21일 남음"},
-    {day:"26",month:"OCT",title:"부가가치세 예정 신고",desc:"일반과세자 기준 신고 일정 확인",tag:"37일 남음"},
-    {day:"31",month:"JAN",title:"사업장현황 관련 자료 점검",desc:"다음 연도 신고 준비 자료 정리",tag:"준비"}
-  ];
-  if(state.profile?.taxType==="면세사업자"){
-    items[1]={day:"10",month:"FEB",title:"사업장현황신고 준비",desc:"면세사업자 관련 신고자료 확인",tag:"예정"};
+  const p=state.profile||{};
+  const items=[];
+  if(p.hasEmployee||p.hasFreelancer){
+    items.push(deadlineItem("withholding",nextMonthlyDay(10),"원천세 · 지방소득세","급여 또는 3.3% 지급 내역을 기준으로 확인"));
   }
-  return items;
+  if(p.hasFreelancer){
+    items.push(deadlineItem("freelancer-report",monthEndAfterNow(),"3.3% 지급명세 자료","사업소득 간이지급명세서 제출 일정 확인"));
+  }
+  if(p.taxType==="면세사업자"){
+    items.push(deadlineItem("business-status",nextFixedDate(2,10),"사업장현황신고","면세사업자 신고자료 준비"));
+  }else if(p.taxType==="간이과세자"){
+    items.push(deadlineItem("vat",nextFixedDate(1,25),"부가가치세 신고","간이과세자 연간 신고 일정 확인"));
+  }else{
+    const jan=nextFixedDate(1,25), jul=nextFixedDate(7,25);
+    items.push(deadlineItem("vat",jan<jul?jan:jul,"부가가치세 신고","일반과세자 확정신고 일정 확인"));
+  }
+  if(p.businessType==="개인사업자"){
+    items.push(deadlineItem("income-tax",nextFixedDate(5,31),"종합소득세 · 개인지방소득세","전년도 소득과 필요경비 자료를 기준으로 준비"));
+  }
+  return items.sort((a,b)=>a.date-b.date).slice(0,5);
 }
 function pageDashboard(){
   const m=getMonthData();
@@ -102,7 +167,7 @@ function pageDashboard(){
         <div class="card">
           <div class="card-head"><h3>최근 거래</h3><button class="link-btn" data-go="finance">매출 · 매입 보기 →</button></div>
           <div class="transaction-list">${state.transactions.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5).map(t=>`
-            <div class="row"><div class="date-badge">${t.date.slice(8,10)}<small>SEP</small></div><div><strong>${esc(t.title)}</strong><p>${esc(t.client||t.type)} · ${t.date}</p></div><strong class="${t.type==='매출'?'positive':'negative'}">${t.type==='매출'?'+':'-'}${won(t.amount)}</strong></div>`).join("")||'<div class="empty">등록된 거래가 없습니다.</div>'}
+            <div class="row"><div class="date-badge">${t.date.slice(8,10)}<small>${monthShort(t.date)}</small></div><div><strong>${esc(t.title)}</strong><p>${esc(t.client||t.type)} · ${t.date}</p></div><strong class="${t.type==='매출'?'positive':'negative'}">${t.type==='매출'?'+':'-'}${won(t.amount)}</strong></div>`).join("")||'<div class="empty">등록된 거래가 없습니다.</div>'}
           </div>
         </div>
       </div>
@@ -130,21 +195,41 @@ function pageFinance(){
   const m=getMonthData();
   return `
   <div class="section-title"><div><p class="eyebrow">MONEY FLOW</p><h2>매출 · 매입</h2></div><button class="primary-btn" data-open-quick>+ 거래 등록</button></div>
-  <div class="metrics">${metric("9월 매출",won(m.sales),"등록 기준","up")}${metric("9월 매입",won(m.costs),"등록 기준")}${metric("영업잔액",won(m.profit),"단순 참고값")}${metric("등록 건수",m.list.length+"건","2026년 9월")}</div>
+  <div class="metrics">${metric(m.label+" 매출",won(m.sales),"등록 기준","up")}${metric(m.label+" 매입",won(m.costs),"등록 기준")}${metric("영업잔액",won(m.profit),"단순 참고값")}${metric("등록 건수",m.list.length+"건",m.year+"년 "+m.monthNo+"월")}</div>
   <div class="table-card"><table class="table"><thead><tr><th>거래일</th><th>구분</th><th>내용</th><th>거래처</th><th class="money">금액</th></tr></thead><tbody>
   ${state.transactions.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(t=>`<tr><td>${t.date}</td><td><span class="pill ${t.type==='매출'?'success':''}">${t.type}</span></td><td>${esc(t.title)}</td><td>${esc(t.client||'-')}</td><td class="money ${t.type==='매출'?'positive':'negative'}">${t.type==='매출'?'+':'-'}${won(t.amount)}</td></tr>`).join("")||'<tr><td colspan="5" class="empty">거래를 등록해보세요.</td></tr>'}
   </tbody></table></div>`;
 }
 function pageTax(){
+  const p=state.profile||{};
+  const ds=deadlines();
+  const byKey=(key)=>ds.find(x=>x.key===key);
+  const cards=[];
+  if(p.taxType==="면세사업자"){
+    const d=byKey("business-status");
+    cards.push(taxCard("사업장현황신고","면세사업자의 수입금액과 사업장 현황 자료를 준비합니다.",d?.display||"연 1회","다음 일정","면세사업자"));
+  }else{
+    const d=byKey("vat");
+    cards.push(taxCard("부가가치세","매출·매입 자료를 기준으로 신고 준비 상태를 확인합니다.",d?.display||"일정 확인","다음 일정",p.taxType||"과세유형 미설정"));
+  }
+  if(p.hasEmployee||p.hasFreelancer){
+    const d=byKey("withholding");
+    cards.push(taxCard("원천세 · 지방소득세","급여 또는 3.3% 지급내역을 월별로 관리합니다.",d?.display||"매월","다음 일정",p.hasFreelancer?"3.3% 인력 사용":"직원 급여 사용"));
+  }
+  if(p.businessType==="개인사업자"){
+    const d=byKey("income-tax");
+    cards.push(taxCard("종합소득세","연간 수입·필요경비 자료를 누적해 신고 준비도를 보여줍니다.",d?.display||"연 1회","다음 일정","개인사업자"));
+  }else{
+    cards.push(taxCard("법인세","법인의 사업연도와 결산월 기준으로 신고 일정을 관리합니다.","결산월 기준","설정 필요","법인사업자"));
+  }
+  if(p.hasEmployee){
+    cards.push(taxCard("4대보험","직원 취득·상실, 급여와 월 보험료 관련 업무를 정리합니다.","매월","관리","직원 사용 중"));
+  }
+  if(!cards.length) cards.push(taxCard("세금 설정","사업자 설정을 완료하면 필요한 신고 항목만 표시합니다.","-","설정","확인 필요"));
   return `
   <div class="section-title"><div><p class="eyebrow">TAX & FILING</p><h2>세금 · 신고</h2></div></div>
-  <div class="notice">현재 화면은 운영 테스트용 안내입니다. 실제 신고 의무와 기한은 사업자 상태·귀속기간 등에 따라 달라질 수 있으므로 서비스화 단계에서 공식 데이터 기준으로 연결해야 합니다.</div>
-  <div class="tax-grid">
-    ${taxCard("부가가치세","매출·매입 자료를 기준으로 신고 준비 상태를 확인합니다.","10.26","예정 신고","거래자료 5건 등록")}
-    ${taxCard("원천세","직원 급여 또는 3.3% 인력 지급내역을 월별로 관리합니다.","10.10","다음 신고","3.3% 인력 사용 설정")}
-    ${taxCard("종합소득세","연간 수입·필요경비 자료를 누적하여 신고 준비도를 보여줍니다.","05.31","연간 일정","자료 누적 중")}
-    ${taxCard("4대보험","상시 직원이 있다면 취득·상실과 월 보험료 관련 업무를 정리합니다.","매월","관리","직원 있음")}
-  </div>`;
+  <div class="notice">현재는 신고 안내용 프로토타입입니다. 실제 신고 의무·기한·세액은 귀속기간과 사업자 조건, 공식 세무 일정에 따라 최종 확인하도록 설계합니다.</div>
+  <div class="tax-grid">${cards.join("")}</div>`;
 }
 function taxCard(title,desc,date,label,status){
   return `<div class="tax-card"><div class="top"><div><h3>${title}</h3><p>${desc}</p></div><div class="due">${date}<small>${label}</small></div></div><span class="pill">${status}</span></div>`;
@@ -154,6 +239,13 @@ function pageClients(){
   <div class="section-title"><div><p class="eyebrow">CLIENTS</p><h2>클라이언트</h2></div><button class="primary-btn" id="addClient">+ 거래처 추가</button></div>
   <div class="table-card"><table class="table"><thead><tr><th>클라이언트</th><th>업무</th><th>상태</th><th class="money">미수금</th></tr></thead><tbody>
   ${state.clients.map(c=>`<tr><td><strong>${esc(c.name)}</strong></td><td>${esc(c.category)}</td><td><span class="pill ${c.status==='진행중'?'success':''}">${esc(c.status)}</span></td><td class="money ${c.receivable>0?'negative':''}">${won(c.receivable)}</td></tr>`).join("")||'<tr><td colspan="4" class="empty">등록된 클라이언트가 없습니다.</td></tr>'}
+  </tbody></table></div>`;
+}
+function pageProjects(){
+  return `
+  <div class="section-title"><div><p class="eyebrow">PROJECTS</p><h2>프로젝트</h2></div><button class="primary-btn" id="addProject">+ 프로젝트 추가</button></div>
+  <div class="table-card"><table class="table"><thead><tr><th>프로젝트</th><th>클라이언트</th><th>상태</th><th>납품일</th><th class="money">계약금액</th></tr></thead><tbody>
+  ${state.projects.map(p=>`<tr><td><strong>${esc(p.name)}</strong></td><td>${esc(p.client||"-")}</td><td><span class="pill ${p.status==="진행중"?"success":""}">${esc(p.status||"진행중")}</span></td><td>${esc(p.dueDate||"-")}</td><td class="money">${won(p.amount)}</td></tr>`).join("")||'<tr><td colspan="5" class="empty">등록된 프로젝트가 없습니다.</td></tr>'}
   </tbody></table></div>`;
 }
 function pagePeople(){
@@ -307,6 +399,8 @@ function pageSettings(){
   <form id="settingsForm" class="settings-grid card">
     <label>상호명<input name="businessName" value="${esc(p.businessName)}"></label>
     <label>대표자명<input name="ownerName" value="${esc(p.ownerName)}"></label>
+    <label>사업자등록번호<input name="businessNumber" value="${esc(p.businessNumber||"")}" placeholder="000-00-00000"></label>
+    <label>사업장 주소<input name="address" value="${esc(p.address||"")}"></label>
     <label>사업자 형태<select name="businessType"><option ${p.businessType==='개인사업자'?'selected':''}>개인사업자</option><option ${p.businessType==='법인사업자'?'selected':''}>법인사업자</option></select></label>
     <label>과세 유형<select name="taxType"><option ${p.taxType==='일반과세자'?'selected':''}>일반과세자</option><option ${p.taxType==='간이과세자'?'selected':''}>간이과세자</option><option ${p.taxType==='면세사업자'?'selected':''}>면세사업자</option></select></label>
     <label>업종<input name="industry" value="${esc(p.industry||'')}"></label>
@@ -316,7 +410,7 @@ function pageSettings(){
     <div class="modal-actions"><button class="primary-btn">변경사항 저장</button></div>
   </form>`;
 }
-const pages={dashboard:["대시보드",pageDashboard],finance:["매출 · 매입",pageFinance],tax:["세금 · 신고",pageTax],clients:["클라이언트",pageClients],people:["인력 관리",pagePeople],calendar:["사업 일정",pageCalendar],documents:["문서 보관",pageDocuments],calculator:["계산기",pageCalculator],settings:["사업자 설정",pageSettings]};
+const pages={dashboard:["대시보드",pageDashboard],finance:["매출 · 매입",pageFinance],tax:["세금 · 신고",pageTax],clients:["클라이언트",pageClients],projects:["프로젝트",pageProjects],people:["인력 관리",pagePeople],calendar:["사업 일정",pageCalendar],documents:["문서 보관",pageDocuments],calculator:["계산기",pageCalculator],settings:["사업자 설정",pageSettings]};
 let currentPage="dashboard";
 
 function render(page=currentPage){
@@ -338,9 +432,16 @@ function bindDynamic(){
     const name=prompt("클라이언트명을 입력하세요."); if(!name)return;
     state.clients.unshift({name,category:"미분류",status:"진행중",receivable:0}); save(); render("clients");
   });
+  $("#addProject")?.addEventListener("click",()=>{
+    const name=prompt("프로젝트명을 입력하세요."); if(!name)return;
+    const client=prompt("클라이언트명을 입력하세요.")||"";
+    const amount=Math.max(0,Number(prompt("계약금액을 입력하세요.","0")||0));
+    state.projects.unshift({id:Date.now(),name,client,amount,status:"진행중",dueDate:""});
+    save(); render("projects");
+  });
   $("#settingsForm")?.addEventListener("submit",(e)=>{
     e.preventDefault(); const f=new FormData(e.currentTarget);
-    state.profile={...state.profile,businessName:f.get("businessName"),ownerName:f.get("ownerName"),businessType:f.get("businessType"),taxType:f.get("taxType"),industry:f.get("industry"),startDate:f.get("startDate"),hasEmployee:f.get("hasEmployee")==="on",hasFreelancer:f.get("hasFreelancer")==="on"}; save(); updateIdentity(); render("settings");
+    state.profile={...state.profile,businessName:f.get("businessName"),ownerName:f.get("ownerName"),businessNumber:f.get("businessNumber")||state.profile.businessNumber||"",address:f.get("address")||state.profile.address||"",businessType:f.get("businessType"),taxType:f.get("taxType"),industry:f.get("industry"),startDate:f.get("startDate"),hasEmployee:f.get("hasEmployee")==="on",hasFreelancer:f.get("hasFreelancer")==="on"}; save(); updateIdentity(); render("settings");
   });
   $$("[data-calculator]").forEach(btn=>btn.addEventListener("click",()=>{
     currentCalculator=btn.dataset.calculator;
@@ -422,10 +523,10 @@ function runDetailedCalculator(card){
 }
 function openQuick(){
   $("#quickModal").classList.remove("hidden");
-  $("#quickForm [name=date]").value=new Date().toISOString().slice(0,10);
+  $("#quickForm [name=date]").value=localDateInputValue();
 }
 
-$$$(".nav-item[data-page]").forEach(btn=>btn.addEventListener("click",()=>{
+$(".nav-item[data-page]").forEach(btn=>btn.addEventListener("click",()=>{
   if(btn.dataset.page==="calculator")currentCalculator=null;
   render(btn.dataset.page);
 }));
@@ -434,37 +535,30 @@ $$("[data-close]").forEach(b=>b.onclick=()=>$("#"+b.dataset.close).classList.add
 $("#quickModal").addEventListener("click",e=>{if(e.target.id==="quickModal")e.currentTarget.classList.add("hidden")});
 $("#quickForm").addEventListener("submit",e=>{
   e.preventDefault();const f=new FormData(e.currentTarget);
-  state.transactions.unshift({id:Date.now(),type:f.get("type"),title:f.get("title"),client:"",amount:Number(f.get("amount")),date:f.get("date")});
+  state.transactions.unshift({id:Date.now(),type:f.get("type"),title:f.get("title"),client:f.get("client")||"",amount:Number(f.get("amount")),date:f.get("date")});
   save();e.currentTarget.reset();$("#quickModal").classList.add("hidden");render("finance");
 });
 $("#onboardingForm").addEventListener("submit",e=>{
   e.preventDefault();const f=new FormData(e.currentTarget);
-  state.profile={businessName:f.get("businessName"),ownerName:f.get("ownerName"),businessType:f.get("businessType"),taxType:f.get("taxType"),industry:f.get("industry"),startDate:f.get("startDate"),hasEmployee:f.get("hasEmployee")==="on",hasFreelancer:f.get("hasFreelancer")==="on"};
+  state.profile={businessName:f.get("businessName"),ownerName:f.get("ownerName"),businessNumber:f.get("businessNumber")||"",address:f.get("address")||"",businessType:f.get("businessType"),taxType:f.get("taxType"),industry:f.get("industry"),startDate:f.get("startDate"),hasEmployee:f.get("hasEmployee")==="on",hasFreelancer:f.get("hasFreelancer")==="on"};
   save();$("#onboardingModal").classList.add("hidden");render("dashboard");
 });
 $("#demoStart").onclick=()=>{
-  state.profile={...demoProfile};state.transactions=[...demoTransactions];state.clients=[...demoClients];save();
+  state.profile={...demoProfile};state.transactions=[...demoTransactions];state.clients=[...demoClients];state.projects=[...demoProjects];state.tasks=[
+    {id:1,text:"이번 달 매출 누락 여부 확인",done:false},
+    {id:2,text:"3.3% 지급내역 정리",done:false},
+    {id:3,text:"미수금 입금일 확인",done:true}
+  ];save();
   $("#onboardingModal").classList.add("hidden");render("dashboard");
 };
 $("#resetDemo").onclick=()=>{
-  if(!confirm("저장된 테스트 데이터를 초기화할까요?"))return;
-  ["solerbiz.profile","solerbiz.transactions","solerbiz.clients","solerbiz.tasks"].forEach(k=>localStorage.removeItem(k));
-  state.profile={...demoProfile};
-  state.transactions=[...demoTransactions];
-  state.clients=[...demoClients];
-  state.tasks=[
-    {id:1,text:"9월 매출 누락 여부 확인",done:false},
-    {id:2,text:"3.3% 지급내역 정리",done:false},
-    {id:3,text:"미수금 입금일 확인",done:true}
-  ];
-  save();
-  currentCalculator=null;
-  render("dashboard");
+  if(!confirm("저장된 사업자 및 테스트 데이터를 초기화할까요?"))return;
+  ["solerbiz.profile","solerbiz.transactions","solerbiz.clients","solerbiz.projects","solerbiz.tasks"].forEach(k=>localStorage.removeItem(k));
+  location.reload();
 };
-// TEST MODE: skip onboarding and open the dashboard immediately.
-$("#onboardingModal")?.classList.add("hidden");
-if(!state.profile)state.profile={...demoProfile};
-if(!state.transactions.length)state.transactions=[...demoTransactions];
-if(!state.clients.length)state.clients=[...demoClients];
-save();
-render("dashboard");
+
+if(!state.profile){
+  $("#onboardingModal")?.classList.remove("hidden");
+}else{
+  render("dashboard");
+}
