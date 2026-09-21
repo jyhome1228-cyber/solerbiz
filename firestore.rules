@@ -1,0 +1,50 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isBusinessOwner(businessId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/businesses/$(businessId))
+        && get(/databases/$(database)/documents/businesses/$(businessId)).data.ownerUid == request.auth.uid;
+    }
+
+    // User profile: only the signed-in user can access their own document.
+    match /users/{uid} {
+      allow create, read, update, delete: if isSelf(uid);
+    }
+
+    // Business root document.
+    match /businesses/{businessId} {
+      allow create: if signedIn()
+        && request.resource.data.ownerUid == request.auth.uid;
+
+      allow read, delete: if signedIn()
+        && resource.data.ownerUid == request.auth.uid;
+
+      allow update: if signedIn()
+        && resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerUid == resource.data.ownerUid;
+    }
+
+    // All business subcollections are owner-only for the current MVP.
+    // clients, projects, transactions, invoices, payments, expenses,
+    // workers, payroll, taxTasks, documents, settings, etc.
+    match /businesses/{businessId}/{document=**} {
+      allow read, write: if isBusinessOwner(businessId);
+    }
+
+    // Everything else remains closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
