@@ -1,6 +1,6 @@
-# SOLER BIZ 로그인 설정
+# SOLAR BIZ 로그인 설정
 
-SOLER BIZ는 정적 GitHub Pages에서도 사용할 수 있도록 Supabase Auth의 이메일/비밀번호 로그인을 기준으로 구성되어 있습니다.
+SOLAR BIZ는 정적 GitHub Pages에서도 사용할 수 있도록 Supabase Auth의 이메일/비밀번호 로그인을 기준으로 구성되어 있습니다.
 
 ## 1. Supabase 프로젝트 생성
 
@@ -28,7 +28,7 @@ window.SOLER_BIZ_CONFIG = {
 
 Supabase Authentication의 URL Configuration에서 다음을 등록합니다.
 
-- Site URL: 실제 SOLER BIZ 주소
+- Site URL: 실제 SOLAR BIZ 주소
 - Redirect URLs: GitHub Pages 주소 및 필요한 Preview 주소
 
 예:
