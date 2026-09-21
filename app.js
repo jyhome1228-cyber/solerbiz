@@ -406,14 +406,315 @@ function pageDashboard(){
 function metric(label,value,note,cls=""){
   return `<div class="metric"><div class="label">${label}</div><strong class="${cls}">${value}</strong><small>${note}</small></div>`;
 }
+let financeTab="records";
+let taxInvoiceDrafts=[];
+let taxInvoiceBusy=false;
+let taxInvoiceStatus={text:"",type:""};
+
+function normalizeBusinessNumber(v=""){return String(v||"").replace(/\D/g,"").slice(0,10)}
+function formatBusinessNumber(v=""){
+  const d=normalizeBusinessNumber(v);
+  return d.length===10?d.replace(/(\d{3})(\d{2})(\d{5})/,"$1-$2-$3"):String(v||"");
+}
+function normalizeClientName(v=""){
+  return String(v||"").toLowerCase().replace(/주식회사|\(주\)|㈜|\s|[.,·_\-]/g,"");
+}
+function findClientMatch(name,businessNumber){
+  const no=normalizeBusinessNumber(businessNumber);
+  if(no){
+    const byNo=state.clients.find(x=>normalizeBusinessNumber(x.businessNumber)===no);
+    if(byNo)return byNo;
+  }
+  const key=normalizeClientName(name);
+  return key?state.clients.find(x=>normalizeClientName(x.name)===key):null;
+}
+function moneyFromText(v=""){return Number(String(v).replace(/[^\d.-]/g,""))||0}
+function pdfMoneyTokens(v=""){
+  return (String(v).match(/\d{1,3}(?:,\d{3})+(?:\.\d+)?/g)||[])
+    .map(moneyFromText).filter(n=>Number.isFinite(n)&&n>0&&n<1e13);
+}
+function normalizeInvoiceDate(raw=""){
+  const s=String(raw||"").trim();
+  let m=s.match(/(20\d{2})\D{0,3}(\d{1,2})\D{0,3}(\d{1,2})/);
+  if(!m)m=s.match(/\b(20\d{2})(\d{2})(\d{2})\b/);
+  if(!m)return "";
+  const y=Number(m[1]),mo=Number(m[2]),d=Number(m[3]);
+  if(mo<1||mo>12||d<1||d>31)return "";
+  return \`${y}-\${pad2(mo)}-\${pad2(d)}\`;
+}
+function groupPdfLines(items){
+  const rows=[];
+  items.filter(x=>x.text).sort((a,b)=>b.y-a.y||a.x-b.x).forEach(item=>{
+    let row=rows.find(r=>Math.abs(r.y-item.y)<2.4);
+    if(!row){row={y:item.y,items:[]};rows.push(row)}
+    row.items.push(item);
+  });
+  return rows.sort((a,b)=>b.y-a.y).map(r=>r.items.sort((a,b)=>a.x-b.x).map(x=>x.text).join(" ").replace(/\s+/g," ").trim()).filter(Boolean);
+}
+async function extractPdfLayout(file){
+  if(!window.pdfjsLib)throw new Error("PDF 분석 라이브러리를 불러오지 못했습니다.");
+  pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  const data=new Uint8Array(await file.arrayBuffer());
+  const pdf=await pdfjsLib.getDocument({data}).promise;
+  const allItems=[];
+  for(let pageNo=1;pageNo<=pdf.numPages;pageNo++){
+    const page=await pdf.getPage(pageNo);
+    const content=await page.getTextContent();
+    content.items.forEach(item=>{
+      const text=String(item.str||"").trim();
+      if(!text)return;
+      allItems.push({text,x:Number(item.transform?.[4]||0),y:Number(item.transform?.[5]||0),page:pageNo});
+    });
+  }
+  if(!allItems.length)throw new Error("텍스트를 읽을 수 없는 PDF입니다. 스캔 이미지 PDF는 현재 지원하지 않습니다.");
+  const xs=allItems.map(x=>x.x);
+  const minX=Math.min(...xs),maxX=Math.max(...xs),mid=minX+(maxX-minX)/2;
+  const allLines=groupPdfLines(allItems);
+  const leftLines=groupPdfLines(allItems.filter(x=>x.x<mid));
+  const rightLines=groupPdfLines(allItems.filter(x=>x.x>=mid));
+  return {allLines,leftLines,rightLines,text:allLines.join("\n"),left:leftLines.join("\n"),right:rightLines.join("\n")};
+}
+function extractBusinessNumbers(text=""){
+  const list=String(text).match(/\b\d{3}[-\s]?\d{2}[-\s]?\d{5}\b/g)||[];
+  return [...new Set(list.map(normalizeBusinessNumber).filter(x=>x.length===10))];
+}
+function cleanCompanyCandidate(v=""){
+  return String(v||"")
+    .replace(/상\s*호\s*(?:\(\s*법인명\s*\))?/g,"")
+    .replace(/성\s*명|대표자|업\s*태|종\s*목|사업장|주소|등록번호|종사업장번호/g," ")
+    .replace(/\b\d{3}[-\s]?\d{2}[-\s]?\d{5}\b/g," ")
+    .replace(/\s+/g," ").trim()
+    .replace(/^[|:：\-]+|[|:：\-]+$/g,"").trim();
+}
+function parseParty(sideText="",fallbackNumber=""){
+  const lines=String(sideText).split("\n").map(x=>x.trim()).filter(Boolean);
+  const businessNumber=extractBusinessNumbers(sideText)[0]||fallbackNumber||"";
+  let name="";
+  for(const line of lines){
+    if(/상\s*호/.test(line)){
+      const candidate=cleanCompanyCandidate(line.replace(/^.*?상\s*호\s*(?:\(\s*법인명\s*\))?/,""));
+      if(candidate.length>=2&&candidate.length<=45&&!/공급자|공급받는자/.test(candidate)){name=candidate;break}
+    }
+  }
+  if(!name&&businessNumber){
+    const idx=lines.findIndex(x=>normalizeBusinessNumber(x).includes(businessNumber));
+    const candidates=lines.slice(Math.max(0,idx),idx+5).map(cleanCompanyCandidate)
+      .filter(x=>x.length>=2&&x.length<=40&&!/등록|번호|공급|작성|합계|세액|금액/.test(x)&&!/\d{5,}/.test(x));
+    name=candidates[0]||"";
+  }
+  return {businessNumber,name};
+}
+function summaryAmounts(lines){
+  let supply=0,vat=0,total=0;
+  for(let i=0;i<lines.length;i++){
+    const line=lines[i];
+    if(/공급가액/.test(line)&&/세액/.test(line)){
+      const nums=[];
+      for(let j=i;j<Math.min(lines.length,i+5);j++) nums.push(...pdfMoneyTokens(lines[j]));
+      if(nums.length>=2){supply=nums[0];vat=nums[1];break}
+    }
+  }
+  for(let i=0;i<lines.length;i++){
+    if(/합계금액|합\s*계/.test(lines[i])){
+      const nums=[];
+      for(let j=i;j<Math.min(lines.length,i+4);j++) nums.push(...pdfMoneyTokens(lines[j]));
+      if(nums.length){total=Math.max(...nums);break}
+    }
+  }
+  if(!total&&supply)total=supply+vat;
+  if(!supply&&total){
+    supply=Math.round(total/1.1);
+    vat=Math.max(0,total-supply);
+  }
+  return {supply,vat,total};
+}
+function parseInvoiceDate(lines,text){
+  const idx=lines.findIndex(x=>/작성일자|작성\s*일/.test(x));
+  if(idx>=0){
+    for(let j=idx;j<Math.min(lines.length,idx+4);j++){
+      const d=normalizeInvoiceDate(lines[j]);
+      if(d)return d;
+    }
+  }
+  const around=String(text).match(/(?:작성일자|작성\s*일)[\s\S]{0,80}/)?.[0]||text;
+  return normalizeInvoiceDate(around);
+}
+async function parseTaxInvoiceFile(file){
+  const layout=await extractPdfLayout(file);
+  const globalNos=extractBusinessNumbers(layout.text);
+  let supplier=parseParty(layout.left,globalNos[0]||"");
+  let recipient=parseParty(layout.right,globalNos[1]||"");
+  if(!supplier.businessNumber&&globalNos[0])supplier.businessNumber=globalNos[0];
+  if(!recipient.businessNumber&&globalNos[1])recipient.businessNumber=globalNos[1];
+  const own=normalizeBusinessNumber(state.profile?.businessNumber||"");
+  let type="매출",counterparty=recipient,matchNote="사업자번호 확인 필요";
+  if(own&&supplier.businessNumber===own){type="매출";counterparty=recipient;matchNote="공급자 기준 매출"}
+  else if(own&&recipient.businessNumber===own){type="매입";counterparty=supplier;matchNote="공급받는자 기준 매입"}
+  const amounts=summaryAmounts(layout.allLines);
+  const date=parseInvoiceDate(layout.allLines,layout.text)||localDateInputValue();
+  const existing=findClientMatch(counterparty.name,counterparty.businessNumber);
+  const warnings=[];
+  if(!own)warnings.push("내 사업자번호 미설정");
+  else if(supplier.businessNumber!==own&&recipient.businessNumber!==own)warnings.push("내 사업자번호와 일치하지 않음");
+  if(!counterparty.name)warnings.push("거래처명 확인 필요");
+  if(!counterparty.businessNumber)warnings.push("거래처 사업자번호 확인 필요");
+  if(!amounts.total)warnings.push("금액 확인 필요");
+  return {
+    id:Date.now()+Math.random(),
+    fileName:file.name,
+    type,
+    supplierName:supplier.name,
+    supplierBusinessNumber:supplier.businessNumber,
+    recipientName:recipient.name,
+    recipientBusinessNumber:recipient.businessNumber,
+    clientName:counterparty.name||existing?.name||"",
+    clientBusinessNumber:counterparty.businessNumber||existing?.businessNumber||"",
+    clientMatched:Boolean(existing),
+    date,
+    supplyAmount:amounts.supply,
+    vatAmount:amounts.vat,
+    totalAmount:amounts.total,
+    warnings,
+    matchNote
+  };
+}
+function taxInvoiceFingerprint(d){
+  return [d.type,normalizeBusinessNumber(d.clientBusinessNumber),d.date,Math.round(Number(d.supplyAmount||0)),Math.round(Number(d.vatAmount||0))].join("|");
+}
+async function handleTaxInvoiceFiles(files){
+  const list=[...files].filter(f=>f.type==="application/pdf"||/\.pdf$/i.test(f.name));
+  if(!list.length){taxInvoiceStatus={text:"PDF 파일을 선택해주세요.",type:"error"};render("finance");return}
+  taxInvoiceBusy=true;
+  taxInvoiceStatus={text:\`${list.length}개 PDF를 분석하고 있습니다…\`,type:""};
+  render("finance");
+  const drafts=[];
+  const errors=[];
+  for(const file of list){
+    try{drafts.push(await parseTaxInvoiceFile(file))}
+    catch(err){errors.push(\`${file.name}: ${err.message||"분석 실패"}\`)}
+  }
+  taxInvoiceDrafts=[...taxInvoiceDrafts,...drafts];
+  taxInvoiceBusy=false;
+  taxInvoiceStatus={
+    text:errors.length?\`${drafts.length}건 분석 완료 · ${errors.length}건 확인 필요\`:\`${drafts.length}건 분석 완료. 내용을 확인한 뒤 저장하세요.\`,
+    type:errors.length?"error":"ok"
+  };
+  if(errors.length)taxInvoiceStatus.detail=errors.join(" / ");
+  render("finance");
+}
+function saveTaxInvoiceDraft(id){
+  const d=taxInvoiceDrafts.find(x=>String(x.id)===String(id));
+  if(!d)return;
+  d.supplyAmount=Math.max(0,Number(d.supplyAmount||0));
+  d.vatAmount=Math.max(0,Number(d.vatAmount||0));
+  d.totalAmount=Math.max(0,Number(d.totalAmount||d.supplyAmount+d.vatAmount));
+  if(!d.clientName.trim()){taxInvoiceStatus={text:"거래처명을 확인해주세요.",type:"error"};render("finance");return}
+  if(!d.date){taxInvoiceStatus={text:"작성일자를 확인해주세요.",type:"error"};render("finance");return}
+  if(!d.totalAmount){taxInvoiceStatus={text:"합계금액을 확인해주세요.",type:"error"};render("finance");return}
+  const fingerprint=taxInvoiceFingerprint(d);
+  if(state.taxInvoices.some(x=>x.fingerprint===fingerprint)){
+    taxInvoiceStatus={text:"이미 저장된 세금계산서와 동일한 거래로 보입니다.",type:"error"};render("finance");return;
+  }
+  let client=findClientMatch(d.clientName,d.clientBusinessNumber);
+  if(!client){
+    client={name:d.clientName,businessNumber:formatBusinessNumber(d.clientBusinessNumber),category:"세금계산서 거래처",status:"진행중",receivable:0};
+    state.clients.unshift(client);
+  }else if(!client.businessNumber&&d.clientBusinessNumber){
+    client.businessNumber=formatBusinessNumber(d.clientBusinessNumber);
+  }
+  const transaction={
+    id:Date.now()+Math.random(),
+    type:d.type,
+    title:d.type==="매출"?"전자세금계산서 매출":"전자세금계산서 매입",
+    client:d.clientName,
+    clientBusinessNumber:formatBusinessNumber(d.clientBusinessNumber),
+    amount:d.totalAmount,
+    supplyAmount:d.supplyAmount,
+    vatAmount:d.vatAmount,
+    taxable:d.vatAmount>0,
+    date:d.date,
+    source:"tax-invoice",
+    fileName:d.fileName
+  };
+  state.transactions.unshift(transaction);
+  state.taxInvoices.unshift({
+    id:transaction.id,
+    fingerprint,
+    fileName:d.fileName,
+    type:d.type,
+    clientName:d.clientName,
+    clientBusinessNumber:formatBusinessNumber(d.clientBusinessNumber),
+    date:d.date,
+    supplyAmount:d.supplyAmount,
+    vatAmount:d.vatAmount,
+    totalAmount:d.totalAmount,
+    savedAt:new Date().toISOString()
+  });
+  taxInvoiceDrafts=taxInvoiceDrafts.filter(x=>String(x.id)!==String(id));
+  save();
+  taxInvoiceStatus={text:\`${d.clientName} 세금계산서를 ${d.type} 기록으로 저장했습니다.\`,type:"ok"};
+  render("finance");
+}
+function updateTaxInvoiceDraft(id,field,value){
+  const d=taxInvoiceDrafts.find(x=>String(x.id)===String(id));
+  if(!d)return;
+  if(["supplyAmount","vatAmount","totalAmount"].includes(field)){
+    d[field]=Math.max(0,Number(value||0));
+    if(field==="supplyAmount"||field==="vatAmount")d.totalAmount=Number(d.supplyAmount||0)+Number(d.vatAmount||0);
+  }else d[field]=value;
+}
+function invoiceDraftCard(d){
+  const badge=d.warnings.length?d.warnings.join(" · "):(d.clientMatched?"기존 거래처 연결":"신규 거래처 생성");
+  return \`<article class="invoice-draft">
+    <div class="invoice-draft-top">
+      <div class="invoice-draft-file"><strong>${esc(d.fileName)}</strong><span>${esc(d.matchNote)}</span></div>
+      <span class="invoice-draft-warning ${d.warnings.length?"":"ok"}">${esc(badge)}</span>
+    </div>
+    <div class="invoice-draft-grid">
+      <label>분류<select data-tax-draft-id="${d.id}" data-tax-draft-field="type"><option ${d.type==='매출'?'selected':''}>매출</option><option ${d.type==='매입'?'selected':''}>매입</option></select></label>
+      <label>작성일<input type="date" value="${esc(d.date)}" data-tax-draft-id="${d.id}" data-tax-draft-field="date"></label>
+      <label>거래처<input value="${esc(d.clientName)}" data-tax-draft-id="${d.id}" data-tax-draft-field="clientName"></label>
+      <label>사업자번호<input value="${esc(formatBusinessNumber(d.clientBusinessNumber))}" placeholder="000-00-00000" data-tax-draft-id="${d.id}" data-tax-draft-field="clientBusinessNumber"></label>
+      <label>공급가액<input type="number" value="${Number(d.supplyAmount||0)}" data-tax-draft-id="${d.id}" data-tax-draft-field="supplyAmount"></label>
+      <label>VAT<input type="number" value="${Number(d.vatAmount||0)}" data-tax-draft-id="${d.id}" data-tax-draft-field="vatAmount"></label>
+    </div>
+    <div class="invoice-draft-actions"><button class="remove" data-tax-draft-remove="${d.id}">제외</button><button class="save" data-tax-draft-save="${d.id}">확인 후 저장 · ${won(d.totalAmount)}</button></div>
+  </article>\`;
+}
+function financeRecordView(m){
+  return \`<div class="metrics">${metric(m.label+" 매출",won(m.sales),"합계금액","up")}${metric(m.label+" 매입",won(m.costs),"합계금액")}${metric("매출 VAT",won(m.salesVat),"등록 기준")}${metric("예상 부가세",won(m.estimatedVat),`매출 VAT - 매입 VAT ${won(m.purchaseVat)}`)}</div>
+  <div class="table-card"><table class="table"><thead><tr><th>거래일</th><th>구분</th><th>내용</th><th>거래처</th><th>증빙</th><th class="money">공급가액</th><th class="money">VAT</th><th class="money">합계</th></tr></thead><tbody>
+  ${state.transactions.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(t=>{const a=transactionAmounts(t);return `<tr><td>${t.date}</td><td><span class="pill ${t.type==='매출'?'success':''}">${t.type}</span></td><td>${esc(t.title)}</td><td>${esc(t.client||'-')}</td><td>${t.source==='tax-invoice'?'<span class="invoice-source">세금계산서</span>':'직접 등록'}</td><td class="money">${won(a.supply)}</td><td class="money">${won(a.vat)}</td><td class="money ${t.type==='매출'?'positive':'negative'}">${won(a.total)}</td></tr>`}).join("")||'<tr><td colspan="8" class="empty">거래를 등록해보세요.</td></tr>'}
+  </tbody></table></div>\`;
+}
+function taxInvoiceImportView(){
+  const saved=state.taxInvoices||[];
+  const sales=saved.filter(x=>x.type==="매출");
+  const totalSupply=sales.reduce((s,x)=>s+Number(x.supplyAmount||0),0);
+  const totalVat=sales.reduce((s,x)=>s+Number(x.vatAmount||0),0);
+  return \`<div class="invoice-import-layout">
+    <div class="invoice-import-intro">
+      <div><h3>전자세금계산서 PDF를 넣으면 거래처와 매출 기록으로 정리합니다.</h3><p>PDF의 공급자·공급받는자, 작성일, 공급가액과 세액을 읽고 내 사업자번호를 기준으로 매출·매입을 구분합니다. 저장 전 결과를 직접 확인하고 수정할 수 있습니다.</p></div>
+      <div class="invoice-import-meta"><span>텍스트형 PDF</span><span>사업자번호 매칭</span><span>확인 후 저장</span></div>
+    </div>
+    <label class="invoice-dropzone" id="taxInvoiceDropzone">
+      <input id="taxInvoiceFiles" type="file" accept="application/pdf,.pdf" multiple ${taxInvoiceBusy?"disabled":""}>
+      <div><div class="invoice-dropzone-icon"><img src="../assets/ui-icons/invoice.svg" alt=""></div><strong>${taxInvoiceBusy?"PDF 분석 중…":"세금계산서 PDF를 끌어놓거나 클릭하세요."}</strong><p>여러 장을 한 번에 선택할 수 있습니다.</p><small>스캔 이미지 PDF는 아직 지원하지 않습니다. 원본 전자세금계산서 PDF를 사용해주세요.</small></div>
+    </label>
+    ${taxInvoiceStatus.text?`<div class="invoice-import-status ${taxInvoiceStatus.type}">${esc(taxInvoiceStatus.text)}${taxInvoiceStatus.detail?`<br><small>${esc(taxInvoiceStatus.detail)}</small>`:''}</div>`:''}
+    ${taxInvoiceDrafts.length?`<div><div class="invoice-draft-head"><h3>분석 결과 확인</h3><span>${taxInvoiceDrafts.length}건 · 저장 전에 수정 가능</span></div><div class="invoice-draft-list">${taxInvoiceDrafts.map(invoiceDraftCard).join("")}</div></div>`:''}
+    <div>
+      <div class="invoice-history-head"><h3>정리된 세금계산서</h3><span>${saved.length}건 저장</span></div>
+      ${saved.length?`<div class="invoice-summary"><div><span>매출 세금계산서</span><strong>${sales.length}건</strong></div><div><span>누적 공급가액</span><strong>${won(totalSupply)}</strong></div><div><span>누적 VAT</span><strong>${won(totalVat)}</strong></div><div><span>등록 거래처</span><strong>${new Set(saved.map(x=>x.clientName).filter(Boolean)).size}곳</strong></div></div><div class="table-card invoice-history-table"><table class="table"><thead><tr><th>작성일</th><th>구분</th><th>거래처</th><th>사업자번호</th><th>파일</th><th class="money">공급가액</th><th class="money">VAT</th><th class="money">합계</th></tr></thead><tbody>${saved.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(x=>`<tr><td>${esc(x.date)}</td><td><span class="pill ${x.type==='매출'?'success':''}">${esc(x.type)}</span></td><td>${esc(x.clientName)}</td><td>${esc(x.clientBusinessNumber||'-')}</td><td>${esc(x.fileName||'-')}</td><td class="money">${won(x.supplyAmount)}</td><td class="money">${won(x.vatAmount)}</td><td class="money">${won(x.totalAmount)}</td></tr>`).join("")}</tbody></table></div>`:`<div class="invoice-empty">아직 정리된 세금계산서가 없습니다.<br>전자세금계산서 PDF를 넣어 첫 매출 기록을 만들어보세요.</div>`}
+    </div>
+  </div>\`;
+}
 function pageFinance(){
   const m=getMonthData();
-  return `
-  <div class="section-title"><div><p class="eyebrow">MONEY & VAT</p><h2>매출 · 매입 · 부가세</h2><p class="section-desc">거래를 등록하면 공급가액과 VAT를 함께 쌓아 신고 준비에 활용합니다.</p></div><button class="primary-btn" data-open-quick>+ 거래 등록</button></div>
-  <div class="metrics">${metric(m.label+" 매출",won(m.sales),"합계금액","up")}${metric(m.label+" 매입",won(m.costs),"합계금액")}${metric("매출 VAT",won(m.salesVat),"등록 기준")}${metric("예상 부가세",won(m.estimatedVat),`매출 VAT - 매입 VAT ${won(m.purchaseVat)}`)}</div>
-  <div class="table-card"><table class="table"><thead><tr><th>거래일</th><th>구분</th><th>내용</th><th>거래처</th><th class="money">공급가액</th><th class="money">VAT</th><th class="money">합계</th></tr></thead><tbody>
-  ${state.transactions.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(t=>{const a=transactionAmounts(t);return `<tr><td>${t.date}</td><td><span class="pill ${t.type==='매출'?'success':''}">${t.type}</span></td><td>${esc(t.title)}</td><td>${esc(t.client||'-')}</td><td class="money">${won(a.supply)}</td><td class="money">${won(a.vat)}</td><td class="money ${t.type==='매출'?'positive':'negative'}">${won(a.total)}</td></tr>`}).join("")||'<tr><td colspan="7" class="empty">거래를 등록해보세요.</td></tr>'}
-  </tbody></table></div>`;
+  return \`
+  <div class="section-title"><div><p class="eyebrow">SALES RECORDS</p><h2>매출기록</h2><p class="section-desc">직접 등록하거나 세금계산서 PDF를 가져와 매출·매입과 VAT 기록을 정리합니다.</p></div><button class="primary-btn" data-open-quick>+ 거래 등록</button></div>
+  <div class="finance-tabs"><button class="finance-tab ${financeTab==='records'?'active':''}" data-finance-tab="records">거래내역</button><button class="finance-tab ${financeTab==='invoice'?'active':''}" data-finance-tab="invoice">세금계산서 정리</button></div>
+  ${financeTab==='invoice'?taxInvoiceImportView():financeRecordView(m)}\`;
 }
 function pageTax(){
   const p=state.profile||{};
