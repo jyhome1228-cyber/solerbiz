@@ -2,15 +2,22 @@
 
 1인 사업자가 **세금, 매출·매입, 클라이언트, 인력, 일정, 문서**를 한 곳에서 관리하기 위한 사업 운영 OS 프로토타입입니다.
 
+## 서비스 구조
+
+- `/solerbiz/` — 제품 소개 랜딩
+- `/solerbiz/login/` — 로그인 / 회원가입
+- `/solerbiz/dashboard/` — 로그인 후 사업 운영 대시보드
+
 ## 로그인 / 계정
 
-- Supabase Auth 기반 이메일·비밀번호 로그인 구조
+- Firebase Authentication 기반 이메일·비밀번호 로그인
 - 세션 유지 / 로그아웃
-- 사용자 ID 기준 localStorage 데이터 분리
-- Supabase 미연결 시 개발 미리보기 모드
-- 실제 연결 방법은 `SUPABASE_SETUP.md` 참고
+- 비로그인 사용자의 Dashboard 접근 차단
+- 사용자 UID 기준 localStorage 데이터 분리
+- Firebase 미연결 시 개발 미리보기 모드
+- 실제 연결 방법은 `FIREBASE_SETUP.md` 참고
 
-> 실제 서비스 공개 전에는 `config.js`에 Supabase Project URL과 publishable/anon key를 입력하고 `allowLocalPreview: false`로 변경해야 합니다.
+> 실제 서비스 공개 전에는 `config.js`에 Firebase Web App 설정값을 입력하고 `allowLocalPreview: false`로 변경해야 합니다.
 
 ## 현재 테스트 버전
 
