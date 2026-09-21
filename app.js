@@ -281,6 +281,9 @@ function businessGuidance(){
   if(p.taxType==="일반과세자"){
     items.push({title:"부가세 기록",desc:`이번 달 매출 VAT ${won(m.salesVat)} · 매입 VAT ${won(m.purchaseVat)} · 현재 예상 ${won(m.estimatedVat)}`,go:"finance"});
   }
+  if(p.salesChannel==="세금계산서"||p.salesChannel==="둘 다"){
+    items.push({title:"세금계산서 정리",desc:"전자세금계산서 PDF를 가져와 거래처와 매출 기록을 빠르게 정리하세요.",go:"finance"});
+  }
   if(p.hasFreelancer){
     items.push({title:"3.3% 인력",desc:"외주 지급이 있었다면 원천세와 사업소득 지급자료 일정을 확인하세요.",go:"tax"});
   }
@@ -1162,7 +1165,7 @@ $("#onboardingForm").addEventListener("submit",e=>{
   save();$("#onboardingModal").classList.add("hidden");render("dashboard");
 });
 $("#demoStart").onclick=()=>{
-  state.profile={...demoProfile};state.transactions=[...demoTransactions];state.clients=[...demoClients];state.projects=[...demoProjects];state.tasks=[
+  state.profile={...demoProfile};state.transactions=[...demoTransactions];state.clients=[...demoClients];state.projects=[...demoProjects];state.taxInvoices=[];state.tasks=[
     {id:1,text:"이번 달 매출 누락 여부 확인",done:false},
     {id:2,text:"3.3% 지급내역 정리",done:false},
     {id:3,text:"미수금 입금일 확인",done:true}
