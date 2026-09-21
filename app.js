@@ -1,6 +1,9 @@
 const $=(s)=>document.querySelector(s);
 const $$=(s)=>[...document.querySelectorAll(s)];
 const KRW=new Intl.NumberFormat("ko-KR",{style:"currency",currency:"KRW",maximumFractionDigits:0});
+const AUTH_USER=window.SOLER_BIZ_USER||{id:"anonymous",email:""};
+const STORAGE_PREFIX=`solerbiz.${AUTH_USER.id}`;
+const storageKey=(name)=>`${STORAGE_PREFIX}.${name}`;
 
 const demoProfile={
   businessName:"나인웍스",
@@ -32,11 +35,11 @@ const demoProjects=[
 ];
 
 let state={
-  profile:JSON.parse(localStorage.getItem("solerbiz.profile")||"null"),
-  transactions:JSON.parse(localStorage.getItem("solerbiz.transactions")||"[]"),
-  clients:JSON.parse(localStorage.getItem("solerbiz.clients")||"[]"),
-  projects:JSON.parse(localStorage.getItem("solerbiz.projects")||"[]"),
-  tasks:JSON.parse(localStorage.getItem("solerbiz.tasks")||"null")||[
+  profile:JSON.parse(localStorage.getItem(storageKey("profile"))||"null"),
+  transactions:JSON.parse(localStorage.getItem(storageKey("transactions"))||"[]"),
+  clients:JSON.parse(localStorage.getItem(storageKey("clients"))||"[]"),
+  projects:JSON.parse(localStorage.getItem(storageKey("projects"))||"[]"),
+  tasks:JSON.parse(localStorage.getItem(storageKey("tasks"))||"null")||[
     {id:1,text:"이번 달 매출 누락 여부 확인",done:false},
     {id:2,text:"3.3% 지급내역 정리",done:false},
     {id:3,text:"미수금 입금일 확인",done:true}
@@ -44,11 +47,11 @@ let state={
 };
 
 function save(){
-  localStorage.setItem("solerbiz.profile",JSON.stringify(state.profile));
-  localStorage.setItem("solerbiz.transactions",JSON.stringify(state.transactions));
-  localStorage.setItem("solerbiz.clients",JSON.stringify(state.clients));
-  localStorage.setItem("solerbiz.projects",JSON.stringify(state.projects));
-  localStorage.setItem("solerbiz.tasks",JSON.stringify(state.tasks));
+  localStorage.setItem(storageKey("profile"),JSON.stringify(state.profile));
+  localStorage.setItem(storageKey("transactions"),JSON.stringify(state.transactions));
+  localStorage.setItem(storageKey("clients"),JSON.stringify(state.clients));
+  localStorage.setItem(storageKey("projects"),JSON.stringify(state.projects));
+  localStorage.setItem(storageKey("tasks"),JSON.stringify(state.tasks));
 }
 function esc(v=""){return String(v).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function won(v){return KRW.format(Number(v||0))}
@@ -562,7 +565,7 @@ $("#demoStart").onclick=()=>{
 };
 $("#resetDemo").onclick=()=>{
   if(!confirm("저장된 사업자 및 테스트 데이터를 초기화할까요?"))return;
-  ["solerbiz.profile","solerbiz.transactions","solerbiz.clients","solerbiz.projects","solerbiz.tasks"].forEach(k=>localStorage.removeItem(k));
+  ["profile","transactions","clients","projects","tasks"].forEach(k=>localStorage.removeItem(storageKey(k)));
   location.reload();
 };
 
