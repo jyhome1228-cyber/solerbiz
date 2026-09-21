@@ -30,7 +30,8 @@ const demoProfile={
   startDate:"2023-01-01",
   hasEmployee:true,
   hasFreelancer:true,
-  hasDailyWorker:false
+  hasDailyWorker:false,
+  salesChannel:"둘 다"
 };
 const demoTransactions=[
   {id:1,type:"매출",title:"브랜드 디자인 프로젝트",client:"건강미",amount:1800000,supplyAmount:1636364,vatAmount:163636,taxable:true,date:"2026-09-16"},
@@ -56,6 +57,7 @@ let state={
   transactions:JSON.parse(localStorage.getItem(storageKey("transactions"))||"[]"),
   clients:JSON.parse(localStorage.getItem(storageKey("clients"))||"[]"),
   projects:JSON.parse(localStorage.getItem(storageKey("projects"))||"[]"),
+  taxInvoices:JSON.parse(localStorage.getItem(storageKey("taxInvoices"))||"[]"),
   tasks:JSON.parse(localStorage.getItem(storageKey("tasks"))||"null")||[
     {id:1,text:"이번 달 매출 누락 여부 확인",done:false},
     {id:2,text:"3.3% 지급내역 정리",done:false},
@@ -68,6 +70,7 @@ function save(){
   localStorage.setItem(storageKey("transactions"),JSON.stringify(state.transactions));
   localStorage.setItem(storageKey("clients"),JSON.stringify(state.clients));
   localStorage.setItem(storageKey("projects"),JSON.stringify(state.projects));
+  localStorage.setItem(storageKey("taxInvoices"),JSON.stringify(state.taxInvoices));
   localStorage.setItem(storageKey("tasks"),JSON.stringify(state.tasks));
   scheduleCloudSave();
 }
@@ -95,6 +98,7 @@ async function persistCloudState(){
       transactions:state.transactions,
       clients:state.clients,
       projects:state.projects,
+      taxInvoices:state.taxInvoices,
       tasks:state.tasks,
       updatedAt:now
     },{merge:true});
@@ -127,11 +131,13 @@ async function hydrateCloudState(){
       state.transactions=Array.isArray(remote.transactions)?remote.transactions:state.transactions;
       state.clients=Array.isArray(remote.clients)?remote.clients:state.clients;
       state.projects=Array.isArray(remote.projects)?remote.projects:state.projects;
+      state.taxInvoices=Array.isArray(remote.taxInvoices)?remote.taxInvoices:state.taxInvoices;
       state.tasks=Array.isArray(remote.tasks)?remote.tasks:state.tasks;
       localStorage.setItem(storageKey("profile"),JSON.stringify(state.profile));
       localStorage.setItem(storageKey("transactions"),JSON.stringify(state.transactions));
       localStorage.setItem(storageKey("clients"),JSON.stringify(state.clients));
       localStorage.setItem(storageKey("projects"),JSON.stringify(state.projects));
+      localStorage.setItem(storageKey("taxInvoices"),JSON.stringify(state.taxInvoices));
       localStorage.setItem(storageKey("tasks"),JSON.stringify(state.tasks));
     }else{
       await businessRef.set({
@@ -144,7 +150,7 @@ async function hydrateCloudState(){
     }
     cloudHydrated=true;
     setSyncStatus("동기화됨","ok");
-    if(!stateSnap.exists&&(state.profile||state.transactions.length||state.clients.length||state.projects.length)){
+    if(!stateSnap.exists&&(state.profile||state.transactions.length||state.clients.length||state.projects.length||state.taxInvoices.length)){
       await persistCloudState();
     }
   }catch(err){
