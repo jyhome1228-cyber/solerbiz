@@ -418,7 +418,7 @@ function render(page=currentPage){
   currentPage=page;
   $("#pageTitle").textContent=pages[page][0];
   $("#content").innerHTML=pages[page][1]();
-  $$$(".nav-item[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+  $$(".nav-item[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
   bindDynamic();
   updateIdentity();
 }
@@ -526,7 +526,7 @@ function openQuick(){
   $("#quickForm [name=date]").value=localDateInputValue();
 }
 
-$(".nav-item[data-page]").forEach(btn=>btn.addEventListener("click",()=>{
+$$(".nav-item[data-page]").forEach(btn=>btn.addEventListener("click",()=>{
   if(btn.dataset.page==="calculator")currentCalculator=null;
   render(btn.dataset.page);
 }));
