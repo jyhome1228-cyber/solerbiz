@@ -1,5 +1,5 @@
 (()=>{
-  const config=window.SOLER_BIZ_CONFIG||{};
+  const config=window.SOLAR_BIZ_CONFIG||{};
   const gate=document.querySelector("#authGate");
   const app=document.querySelector("#app");
   const form=document.querySelector("#authForm");
@@ -33,12 +33,12 @@
   function loadApp(user){
     if(appLoaded)return;
     appLoaded=true;
-    window.SOLER_BIZ_USER={
+    window.SOLAR_BIZ_USER={
       id:user?.id||"local-preview",
-      email:user?.email||"local-preview@soler.biz",
+      email:user?.email||"local-preview@solar.biz",
       isLocalPreview:!user?.id
     };
-    if(accountEmail)accountEmail.textContent=window.SOLER_BIZ_USER.isLocalPreview?"로컬 미리보기":window.SOLER_BIZ_USER.email;
+    if(accountEmail)accountEmail.textContent=window.SOLAR_BIZ_USER.isLocalPreview?"로컬 미리보기":window.SOLAR_BIZ_USER.email;
     gate?.classList.add("hidden");
     app?.classList.remove("hidden");
     document.body.classList.remove("auth-pending");
@@ -114,7 +114,7 @@
         detectSessionInUrl:true
       }
     });
-    window.SOLER_BIZ_SUPABASE=client;
+    window.SOLAR_BIZ_SUPABASE=client;
 
     const {data,error}=await client.auth.getSession();
     if(error){
@@ -145,7 +145,7 @@
     loadApp(null);
   });
   logoutBtn?.addEventListener("click",async()=>{
-    if(window.SOLER_BIZ_USER?.isLocalPreview){
+    if(window.SOLAR_BIZ_USER?.isLocalPreview){
       location.reload();
       return;
     }
