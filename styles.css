@@ -2157,3 +2157,56 @@ body[data-auth-context="dashboard"] .nav-item.active .nav-icon{
     flex-basis:20px;
   }
 }
+
+
+/* Official Solarbiz icon system */
+.nav-icon{
+  width:18px;
+  height:18px;
+  flex:0 0 18px;
+  display:block;
+}
+body[data-auth-context="dashboard"] .nav-item.active .nav-icon{
+  filter:none;
+}
+body[data-auth-context="dashboard"] .nav-item .nav-icon{
+  opacity:.78;
+}
+body[data-auth-context="dashboard"] .nav-item:hover .nav-icon,
+body[data-auth-context="dashboard"] .nav-item.active .nav-icon{
+  opacity:1;
+}
+.brand-icon{
+  display:block;
+  width:100%;
+  height:100%;
+}
+.landing-feature-icon,
+.feature-detail-icon{
+  width:58px;
+  height:58px;
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  background:#eef3ff;
+  overflow:hidden;
+}
+.landing-feature-card.feature-primary .landing-feature-icon{
+  background:#fff;
+}
+.landing-feature-card .landing-feature-icon{
+  margin-bottom:18px;
+}
+.feature-detail-icon{
+  margin-bottom:22px;
+}
+.feature-detail .feature-detail-icon + span{
+  margin-top:0;
+}
+@media(max-width:1000px){
+  body[data-auth-context="dashboard"] .nav-icon{
+    width:20px;
+    height:20px;
+    flex-basis:20px;
+  }
+}
