@@ -974,6 +974,7 @@ function pageSettings(){
     <label>사업장 주소<input name="address" value="${esc(p.address||"")}"></label>
     <label>사업자 형태<select name="businessType"><option ${p.businessType==='개인사업자'?'selected':''}>개인사업자</option><option ${p.businessType==='법인사업자'?'selected':''}>법인사업자</option></select></label>
     <label>과세 유형<select name="taxType"><option ${p.taxType==='일반과세자'?'selected':''}>일반과세자</option><option ${p.taxType==='간이과세자'?'selected':''}>간이과세자</option><option ${p.taxType==='면세사업자'?'selected':''}>면세사업자</option></select></label>
+    <label>매출 관리 방식<select name="salesChannel"><option ${p.salesChannel==='둘 다'?'selected':''}>둘 다</option><option ${p.salesChannel==='카드매출'?'selected':''}>카드매출</option><option ${p.salesChannel==='세금계산서'?'selected':''}>세금계산서</option></select></label>
     <label>업종<input name="industry" value="${esc(p.industry||'')}"></label>
     <label>개업일<input type="date" name="startDate" value="${esc(p.startDate||'')}"></label>
     <div class="check-card"><span>직원(4대보험) 고용</span><label class="switch"><input name="hasEmployee" type="checkbox" ${p.hasEmployee?'checked':''}><i></i></label></div>
@@ -1013,9 +1014,29 @@ function bindDynamic(){
   });
   $("#settingsForm")?.addEventListener("submit",(e)=>{
     e.preventDefault(); const f=new FormData(e.currentTarget);
-    state.profile={...state.profile,businessName:f.get("businessName"),ownerName:f.get("ownerName"),businessNumber:f.get("businessNumber")||state.profile.businessNumber||"",address:f.get("address")||state.profile.address||"",businessType:f.get("businessType"),taxType:f.get("taxType"),industry:f.get("industry"),startDate:f.get("startDate"),hasEmployee:f.get("hasEmployee")==="on",hasFreelancer:f.get("hasFreelancer")==="on",hasDailyWorker:f.get("hasDailyWorker")==="on"}; save(); updateIdentity(); render("settings");
+    state.profile={...state.profile,businessName:f.get("businessName"),ownerName:f.get("ownerName"),businessNumber:f.get("businessNumber")||state.profile.businessNumber||"",address:f.get("address")||state.profile.address||"",businessType:f.get("businessType"),taxType:f.get("taxType"),industry:f.get("industry"),startDate:f.get("startDate"),hasEmployee:f.get("hasEmployee")==="on",hasFreelancer:f.get("hasFreelancer")==="on",hasDailyWorker:f.get("hasDailyWorker")==="on",salesChannel:f.get("salesChannel")||state.profile.salesChannel||"둘 다"}; save(); updateIdentity(); render("settings");
   });
-  $$("[data-calculator]").forEach(btn=>btn.addEventListener("click",()=>{
+  $("[data-finance-tab]").forEach(btn=>btn.addEventListener("click",()=>{
+    financeTab=btn.dataset.financeTab||"records";
+    render("finance");
+  }));
+  $("#taxInvoiceFiles")?.addEventListener("change",e=>handleTaxInvoiceFiles(e.target.files));
+  const invoiceDrop=$("#taxInvoiceDropzone");
+  if(invoiceDrop){
+    ["dragenter","dragover"].forEach(type=>invoiceDrop.addEventListener(type,e=>{e.preventDefault();invoiceDrop.classList.add("is-dragover")}));
+    ["dragleave","drop"].forEach(type=>invoiceDrop.addEventListener(type,e=>{e.preventDefault();invoiceDrop.classList.remove("is-dragover")}));
+    invoiceDrop.addEventListener("drop",e=>handleTaxInvoiceFiles(e.dataTransfer?.files||[]));
+  }
+  $("[data-tax-draft-field]").forEach(input=>{
+    const event=input.tagName==="SELECT"?"change":"input";
+    input.addEventListener(event,()=>updateTaxInvoiceDraft(input.dataset.taxDraftId,input.dataset.taxDraftField,input.value));
+  });
+  $("[data-tax-draft-save]").forEach(btn=>btn.addEventListener("click",()=>saveTaxInvoiceDraft(btn.dataset.taxDraftSave)));
+  $("[data-tax-draft-remove]").forEach(btn=>btn.addEventListener("click",()=>{
+    taxInvoiceDrafts=taxInvoiceDrafts.filter(x=>String(x.id)!==String(btn.dataset.taxDraftRemove));
+    render("finance");
+  }));
+  $("[data-calculator]").forEach(btn=>btn.addEventListener("click",()=>{
     currentCalculator=btn.dataset.calculator;
     render("calculator");
   }));
@@ -1137,7 +1158,7 @@ $("#quickForm").addEventListener("submit",e=>{
 });
 $("#onboardingForm").addEventListener("submit",e=>{
   e.preventDefault();const f=new FormData(e.currentTarget);
-  state.profile={businessName:f.get("businessName"),ownerName:f.get("ownerName"),businessNumber:f.get("businessNumber")||"",address:f.get("address")||"",businessType:f.get("businessType"),taxType:f.get("taxType"),industry:f.get("industry"),startDate:f.get("startDate"),hasEmployee:f.get("hasEmployee")==="on",hasFreelancer:f.get("hasFreelancer")==="on",hasDailyWorker:f.get("hasDailyWorker")==="on"};
+  state.profile={businessName:f.get("businessName"),ownerName:f.get("ownerName"),businessNumber:f.get("businessNumber")||"",address:f.get("address")||"",businessType:f.get("businessType"),taxType:f.get("taxType"),salesChannel:f.get("salesChannel")||"둘 다",industry:f.get("industry"),startDate:f.get("startDate"),hasEmployee:f.get("hasEmployee")==="on",hasFreelancer:f.get("hasFreelancer")==="on",hasDailyWorker:f.get("hasDailyWorker")==="on"};
   save();$("#onboardingModal").classList.add("hidden");render("dashboard");
 });
 $("#demoStart").onclick=()=>{
