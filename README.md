@@ -2,6 +2,16 @@
 
 1인 사업자가 **세금, 매출·매입, 클라이언트, 인력, 일정, 문서**를 한 곳에서 관리하기 위한 사업 운영 OS 프로토타입입니다.
 
+## 로그인 / 계정
+
+- Supabase Auth 기반 이메일·비밀번호 로그인 구조
+- 세션 유지 / 로그아웃
+- 사용자 ID 기준 localStorage 데이터 분리
+- Supabase 미연결 시 개발 미리보기 모드
+- 실제 연결 방법은 `SUPABASE_SETUP.md` 참고
+
+> 실제 서비스 공개 전에는 `config.js`에 Supabase Project URL과 publishable/anon key를 입력하고 `allowLocalPreview: false`로 변경해야 합니다.
+
 ## 현재 테스트 버전
 
 처음 접속하면 사업자 기본 정보를 입력하고, 입력값을 기준으로 맞춤형 대시보드를 생성합니다.
