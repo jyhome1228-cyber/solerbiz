@@ -923,3 +923,37 @@
     width:calc(100% - 32px)!important;
   }
 }
+
+/* Stable public icon rendering / 2026-09-21 */
+.landing-feature-icon,
+.flow-card-icon,
+.tool-card-icon,
+.feature-detail-icon{
+  overflow:hidden!important;
+  flex:0 0 auto;
+}
+
+.landing-feature-icon img,
+.flow-card-icon img,
+.tool-card-icon img,
+.feature-detail-icon img{
+  width:100%!important;
+  height:100%!important;
+  display:block!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+
+.landing-feature-icon img{padding:10px!important}
+.flow-card-icon img{padding:6px!important}
+.tool-card-icon img{padding:7px!important}
+.feature-detail-icon img{padding:10px!important}
+
+.landing-feature-card.feature-primary h3,
+.landing-feature-card.feature-primary p,
+.landing-feature-card.feature-primary>span{
+  color:inherit!important;
+}
+.landing-feature-card.feature-primary>span{
+  color:var(--accent)!important;
+}
