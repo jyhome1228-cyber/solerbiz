@@ -12,11 +12,24 @@
   <link rel="icon" type="image/svg+xml" href="../assets/solarbiz-symbol.svg" />
   <link rel="stylesheet" href="../styles.css" />
 </head>
-<body class="auth-pending" data-auth-context="login">
+<body class="auth-pending subpage-body" data-auth-context="login">
+  <header class="subpage-header">
+    <a class="subpage-brand" href="../" aria-label="Solarbiz. 홈">
+      <img src="../assets/solarbiz-logo.svg" alt="Solarbiz." />
+    </a>
+    <nav class="subpage-nav" aria-label="공통 메뉴">
+      <a href="../#features">주요 기능</a>
+      <a href="../#pricing">요금제</a>
+      <a href="../#contact">도입문의</a>
+    </nav>
+    <div class="subpage-actions">
+      <a href="../login/">로그인</a>
+      <a class="subpage-start" href="../login/?mode=signup">무료로 시작하기</a>
+    </div>
+  </header>
   <section class="auth-gate hidden" id="authGate" aria-label="로그인">
     <div class="auth-panel">
-      <a class="auth-home-link" href="../">← Solarbiz. 소개로</a>
-      <div class="auth-brand">
+<div class="auth-brand">
         <img class="brand-logo brand-logo-auth" src="../assets/solarbiz-logo.svg" alt="Solarbiz." />
         <div>
           <h1 id="authTitle">다시 만나서 반가워요.</h1>
