@@ -541,3 +541,112 @@ body[data-auth-context="dashboard"] .modal.compact{
   }
   body[data-auth-context="dashboard"] .metric:last-child{border-bottom:0}
 }
+
+
+/* Landing refinement — compact editorial scale */
+.landing-page .landing-hero{
+  margin-top:56px;
+  margin-bottom:104px;
+  grid-template-columns:minmax(0,.86fr) minmax(460px,1.14fr);
+  gap:84px;
+}
+.landing-page .landing-hero-copy{
+  max-width:590px;
+}
+.landing-page .landing-kicker{
+  margin-bottom:15px;
+  font-size:9px;
+  letter-spacing:.13em;
+}
+.landing-page .landing-hero h1{
+  max-width:560px;
+  font-size:50px;
+  line-height:1.18;
+  letter-spacing:-.055em;
+  font-weight:650;
+}
+.landing-page .landing-lead{
+  max-width:540px;
+  margin-top:25px;
+  font-size:14px;
+  line-height:1.85;
+  color:#737e94;
+  letter-spacing:-.018em;
+}
+.landing-page .landing-hero-actions{
+  margin-top:30px;
+  gap:18px;
+}
+.landing-page .landing-cta{
+  min-height:46px;
+  padding:0 20px;
+  border-radius:9px;
+  font-size:12px;
+}
+.landing-page .landing-text-link{
+  font-size:11px;
+  font-weight:600;
+}
+.landing-page .landing-section-head{
+  max-width:610px;
+  margin-bottom:30px;
+}
+.landing-page .landing-section-head h2{
+  font-size:34px;
+  line-height:1.32;
+  letter-spacing:-.045em;
+}
+.landing-page .landing-feature-card{
+  min-height:260px;
+  border-radius:18px;
+  padding:24px;
+}
+.landing-page .landing-feature-card h3{
+  font-size:20px;
+  line-height:1.35;
+}
+.landing-page .landing-feature-card p{
+  font-size:11px;
+  line-height:1.8;
+}
+.landing-page .landing-product-preview{
+  border-radius:20px;
+  box-shadow:0 18px 50px rgba(22,80,246,.09);
+  transform:none;
+}
+.landing-page .landing-flow-section{
+  border-radius:22px;
+  padding:40px;
+}
+.landing-page .landing-flow>div{
+  border-radius:10px;
+}
+.landing-page .landing-tool-grid>div{
+  border-radius:12px;
+}
+.landing-page .landing-final{
+  border-radius:20px;
+}
+@media(max-width:900px){
+  .landing-page .landing-hero{
+    margin-top:42px;
+    gap:48px;
+  }
+  .landing-page .landing-hero h1{
+    font-size:44px;
+    line-height:1.2;
+  }
+}
+@media(max-width:600px){
+  .landing-page .landing-hero h1{
+    font-size:36px;
+    line-height:1.22;
+  }
+  .landing-page .landing-lead{
+    font-size:13px;
+    line-height:1.8;
+  }
+  .landing-page .landing-section-head h2{
+    font-size:28px;
+  }
+}
