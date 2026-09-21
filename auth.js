@@ -65,6 +65,13 @@
     const preview=document.querySelector("#authPreview");
     const mode=new URLSearchParams(location.search).get("mode");
 
+    // 개발 미리보기는 Firebase 설정 여부와 관계없이 먼저 바인딩한다.
+    preview?.addEventListener("click",()=>{
+      if(!settings.allowLocalPreview)return;
+      localStorage.setItem(previewKey,"1");
+      location.replace(dashboardPath);
+    });
+
     if(mode==="signup"){
       document.querySelector("#authTitle").textContent="Solarbiz. 시작하기";
       document.querySelector("#authSubmitLabel").textContent="로그인";
@@ -129,11 +136,6 @@
       }
     });
 
-    preview?.addEventListener("click",()=>{
-      if(!settings.allowLocalPreview)return;
-      localStorage.setItem(previewKey,"1");
-      location.replace(dashboardPath);
-    });
   }
 
   async function initDashboard(){
