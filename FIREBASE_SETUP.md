@@ -78,14 +78,24 @@ Firebase Console > Authentication > Sign-in method에서 Email/Password를 활�
 
 ## 6. Firestore Security Rules
 
-실서비스에서는 반드시 Security Rules를 적용합니다.
+Firestore는 **프로덕션 모드**로 생성합니다. 기본 `allow read, write: if false;` 상태는 안전하지만 앱 데이터도 모두 차단합니다.
 
-기본 원칙:
+저장소의 `firestore.rules`를 Firebase Console > Firestore Database > 규칙에 붙여넣거나 Firebase CLI로 배포합니다.
 
-- 로그인 사용자만 접근
-- 자신이 소속된 business 데이터만 조회/수정
-- 클라이언트에서 관리자 권한 우회 불가
-- 주민번호 등 민감정보는 최소 수집 및 별도 보호
+현재 MVP 규칙:
+
+- `users/{uid}` — 본인만 읽기/쓰기
+- `businesses/{businessId}` — `ownerUid`와 로그인 UID가 일치하는 소유자만 접근
+- `businesses/{businessId}/**` — 소유자만 모든 하위 데이터 접근
+- 그 외 경로 — 전부 차단
+
+현재 규칙은 **1인사업자/단일 소유자 MVP 기준**입니다. TEAM 플랜을 실제 구현할 때 `members` 및 역할 기반 권한으로 확장합니다.
+
+중요:
+
+- 클라이언트 코드에서 관리자 권한을 만들지 않음
+- `ownerUid`는 생성 후 일반 업데이트로 변경할 수 없게 유지
+- 주민번호 등 민감정보는 최소 수집하고 Firestore에 평문 저장하지 않는 방향으로 설계
 
 ## 7. Storage
 
