@@ -2137,3 +2137,23 @@ body[data-auth-context="dashboard"] .tax-guide-grid ol{
   .public-results>div,.public-results>div:nth-child(2n){border-right:0;border-bottom:1px solid #e5e8ef}
   .public-results>div:last-child{border-bottom:0}
 }
+
+
+/* Exact Solarbiz dashboard SVG icons */
+body[data-auth-context="dashboard"] .nav-icon{
+  width:18px;
+  height:18px;
+  flex:0 0 18px;
+  display:block;
+  object-fit:contain;
+}
+body[data-auth-context="dashboard"] .nav-item.active .nav-icon{
+  filter:none;
+}
+@media(max-width:1000px){
+  body[data-auth-context="dashboard"] .nav-icon{
+    width:20px;
+    height:20px;
+    flex-basis:20px;
+  }
+}
