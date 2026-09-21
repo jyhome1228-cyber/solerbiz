@@ -1208,3 +1208,345 @@
     padding-bottom:66px!important;
   }
 }
+
+/* Icon-free public system / 2026-09-22 */
+:root{
+  --marketing-section:84px;
+  --marketing-section-mobile:62px;
+}
+
+/* Decorative card icons are intentionally removed. */
+.landing-feature-icon,
+.flow-card-icon,
+.tool-card-icon,
+.feature-detail-icon,
+.public-calc-icon,
+.pricing-plan-icon,
+.contact-page-icon{
+  display:none!important;
+}
+
+/* Shared section rhythm */
+.landing-page .landing-section,
+.marketing-band,
+.public-calculator-band{
+  padding-top:84px!important;
+  padding-bottom:84px!important;
+}
+.landing-section-head,
+.marketing-head{
+  max-width:780px!important;
+  margin:0 auto 42px!important;
+  text-align:center!important;
+}
+.landing-section-head .landing-kicker,
+.marketing-head .landing-kicker{
+  text-align:center!important;
+}
+.landing-section-head h2,
+.marketing-head h2{
+  max-width:760px!important;
+  margin:0 auto!important;
+  font-size:clamp(29px,2.45vw,36px)!important;
+  font-weight:660!important;
+  line-height:1.3!important;
+  letter-spacing:-.04em!important;
+}
+.landing-section-copy{
+  max-width:680px!important;
+  margin:16px auto 0!important;
+  color:#6d7789!important;
+  font-size:14px!important;
+  line-height:1.74!important;
+  text-align:center!important;
+}
+
+/* Core 3 cards */
+.landing-feature-grid{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:16px!important;
+}
+.landing-feature-card{
+  min-height:210px!important;
+  padding:28px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:flex-start!important;
+  border:1px solid #e0e5ef!important;
+  border-radius:12px!important;
+  background:#fff!important;
+  box-shadow:none!important;
+  color:#171a22!important;
+}
+.landing-feature-card.feature-primary{
+  border-color:#d5e0ff!important;
+  background:#f8faff!important;
+}
+.landing-feature-card>span{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-width:42px!important;
+  height:28px!important;
+  margin:0 0 24px!important;
+  padding:0 11px!important;
+  border-radius:999px!important;
+  background:#eef3ff!important;
+  color:#1650f6!important;
+  font:700 10px/1 Inter,Pretendard,sans-serif!important;
+  letter-spacing:.055em!important;
+}
+.landing-feature-card h3{
+  margin:0 0 12px!important;
+  color:#171a22!important;
+  font-size:20px!important;
+  font-weight:660!important;
+  line-height:1.4!important;
+  letter-spacing:-.03em!important;
+}
+.landing-feature-card p{
+  max-width:390px!important;
+  margin:0!important;
+  color:#6d7789!important;
+  font-size:14px!important;
+  line-height:1.72!important;
+}
+
+/* Connected flow: number becomes the visual anchor */
+.landing-flow{
+  display:grid!important;
+  grid-template-columns:
+    minmax(0,1fr) 22px
+    minmax(0,1fr) 22px
+    minmax(0,1fr) 22px
+    minmax(0,1fr) 22px
+    minmax(0,1fr)!important;
+  gap:10px!important;
+  align-items:stretch!important;
+}
+.landing-flow>i{
+  display:grid!important;
+  place-items:center!important;
+  color:#b1bac9!important;
+  font-size:17px!important;
+  font-style:normal!important;
+}
+.flow-card{
+  min-height:142px!important;
+  padding:20px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:flex-start!important;
+  border:1px solid #e1e6ef!important;
+  border-radius:10px!important;
+  background:#fff!important;
+  box-shadow:none!important;
+}
+.flow-card>span{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-width:38px!important;
+  height:26px!important;
+  margin:0 0 18px!important;
+  padding:0 10px!important;
+  border-radius:999px!important;
+  background:#f2f4f8!important;
+  color:#95a0b2!important;
+  font:700 9px/1 Inter,Pretendard,sans-serif!important;
+  letter-spacing:.05em!important;
+}
+.flow-card b{
+  display:block!important;
+  margin:0 0 8px!important;
+  color:#171a22!important;
+  font-size:15px!important;
+  font-weight:660!important;
+  line-height:1.4!important;
+  letter-spacing:-.022em!important;
+}
+.flow-card p{
+  margin:0!important;
+  color:#737d8e!important;
+  font-size:11px!important;
+  line-height:1.62!important;
+}
+
+/* Tool cards become text-first mini panels */
+.landing-tool-grid{
+  gap:14px!important;
+}
+.landing-page .landing-tool-grid>div{
+  min-height:142px!important;
+  padding:22px!important;
+  border:1px solid #e1e6ef!important;
+  border-radius:10px!important;
+  background:#fff!important;
+  box-shadow:none!important;
+}
+.landing-page .landing-tool-grid>div>span{
+  margin:0 0 18px!important;
+  color:#1650f6!important;
+  font:700 10px/1.3 Inter,Pretendard,sans-serif!important;
+  letter-spacing:.07em!important;
+}
+.landing-page .landing-tool-grid strong{
+  margin-top:auto!important;
+  color:#171a22!important;
+  font-size:15px!important;
+  font-weight:650!important;
+  line-height:1.45!important;
+}
+
+/* Feature subpage cards */
+.marketing-grid.two{
+  gap:16px!important;
+}
+.feature-detail{
+  min-height:198px!important;
+  padding:28px!important;
+  border:1px solid #e0e5ef!important;
+  border-radius:12px!important;
+  background:#fff!important;
+  box-shadow:none!important;
+}
+.feature-detail>span{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-width:42px!important;
+  height:28px!important;
+  margin:0 0 22px!important;
+  padding:0 11px!important;
+  border-radius:999px!important;
+  background:#eef3ff!important;
+  color:#1650f6!important;
+  font:700 10px/1 Inter,Pretendard,sans-serif!important;
+}
+.feature-detail h2{
+  margin:0 0 11px!important;
+  color:#171a22!important;
+  font-size:20px!important;
+  font-weight:660!important;
+  line-height:1.4!important;
+  letter-spacing:-.03em!important;
+}
+.feature-detail p{
+  margin:0!important;
+  color:#6f798a!important;
+  font-size:13px!important;
+  line-height:1.7!important;
+}
+
+/* Calculator cards */
+.public-calc-head{
+  display:grid!important;
+  grid-template-columns:auto minmax(0,1fr)!important;
+  align-items:start!important;
+  gap:14px!important;
+  margin-bottom:22px!important;
+}
+.public-calc-head>span{
+  min-width:54px!important;
+  height:30px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0 12px!important;
+  border-radius:999px!important;
+  background:#eef3ff!important;
+  color:#1650f6!important;
+  font:700 10px/1 Inter,Pretendard,sans-serif!important;
+  letter-spacing:.05em!important;
+}
+.public-calc-head h2{
+  margin:0 0 5px!important;
+  color:#171a22!important;
+  font-size:19px!important;
+  font-weight:660!important;
+  line-height:1.4!important;
+}
+.public-calc-head p{
+  margin:0!important;
+  color:#7a8496!important;
+  font-size:11px!important;
+  line-height:1.6!important;
+}
+
+/* Pricing cards: plan label replaces icons */
+.pricing-card{
+  padding-top:28px!important;
+}
+.pricing-label{
+  margin-bottom:18px!important;
+  font-size:10px!important;
+}
+.pricing-head h3{
+  margin-bottom:10px!important;
+}
+
+/* Contact page without decorative icon */
+.contact-page-note>span{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:30px!important;
+  margin:0 0 18px!important;
+  padding:0 12px!important;
+  border-radius:999px!important;
+  background:#eef3ff!important;
+  color:#1650f6!important;
+  font:700 10px/1 Inter,Pretendard,sans-serif!important;
+}
+.contact-page-note h2{
+  margin-top:0!important;
+}
+
+/* Avoid old icon spacing from legacy stylesheet */
+.landing-feature-card .landing-feature-icon + span,
+.feature-detail .feature-detail-icon + span{
+  margin-top:0!important;
+}
+
+@media(max-width:1100px){
+  .landing-flow{
+    grid-template-columns:1fr 1fr!important;
+  }
+  .landing-flow>i{
+    display:none!important;
+  }
+}
+
+@media(max-width:760px){
+  .landing-page .landing-section,
+  .marketing-band,
+  .public-calculator-band{
+    padding-top:62px!important;
+    padding-bottom:62px!important;
+  }
+  .landing-feature-grid,
+  .marketing-grid.two{
+    grid-template-columns:1fr!important;
+  }
+  .landing-feature-card,
+  .feature-detail,
+  .flow-card{
+    min-height:0!important;
+    padding:22px!important;
+  }
+  .landing-flow{
+    grid-template-columns:1fr!important;
+  }
+  .landing-feature-card h3,
+  .feature-detail h2{
+    font-size:18px!important;
+  }
+  .landing-feature-card p,
+  .feature-detail p,
+  .flow-card p{
+    font-size:13px!important;
+  }
+}
