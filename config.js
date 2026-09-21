@@ -1,4 +1,4 @@
-window.SOLER_BIZ_CONFIG = {
+window.SOLAR_BIZ_CONFIG = {
   // Supabase Dashboard > Project Settings > API
   // 브라우저에는 publishable/anon key만 넣습니다. service_role key는 절대 넣지 않습니다.
   supabaseUrl: "",
