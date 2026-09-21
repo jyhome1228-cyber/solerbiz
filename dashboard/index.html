@@ -83,6 +83,7 @@
         <label>개업일<input name="startDate" type="date" /></label>
         <div class="check-card"><span>직원(4대보험) 고용</span><label class="switch"><input name="hasEmployee" type="checkbox" /><i></i></label></div>
         <div class="check-card"><span>3.3% 인력 사용</span><label class="switch"><input name="hasFreelancer" type="checkbox" checked /><i></i></label></div>
+        <div class="check-card"><span>일용직 사용</span><label class="switch"><input name="hasDailyWorker" type="checkbox" /><i></i></label></div>
         <div class="modal-actions">
           <button type="button" class="ghost-btn" id="demoStart">테스트 데이터로 시작</button>
           <button type="submit" class="primary-btn">대시보드 만들기</button>
@@ -102,6 +103,18 @@
         <label>내용<input name="title" placeholder="예: 브랜드 디자인 잔금" required /></label>
         <label>거래처<input name="client" placeholder="예: 건강미" /></label>
         <label>금액<input name="amount" type="number" min="0" placeholder="1000000" required /></label>
+        <label>금액 입력 기준
+          <select name="amountMode">
+            <option value="total">합계금액 (VAT 포함)</option>
+            <option value="supply">공급가액</option>
+          </select>
+        </label>
+        <label>부가세 처리
+          <select name="taxable">
+            <option value="taxable">과세 10%</option>
+            <option value="exempt">면세 / 부가세 없음</option>
+          </select>
+        </label>
         <label>거래일<input name="date" type="date" required /></label>
         <div class="modal-actions">
           <button type="button" class="ghost-btn" data-close="quickModal">취소</button>
