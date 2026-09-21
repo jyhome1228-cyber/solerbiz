@@ -1550,3 +1550,141 @@
     font-size:13px!important;
   }
 }
+
+/* Hero flush + stable UI icons / 2026-09-22 */
+/* Hero image sits directly on the next section boundary. */
+.landing-page .landing-hero{
+  padding:92px 0 0!important;
+  align-items:end!important;
+}
+.landing-page .landing-hero-copy{
+  align-self:center!important;
+  padding-bottom:82px!important;
+}
+.landing-page .landing-hero-visual{
+  align-self:end!important;
+  margin-bottom:0!important;
+  border-bottom-left-radius:0!important;
+  border-bottom-right-radius:0!important;
+  border-bottom-color:transparent!important;
+}
+.landing-page .landing-hero-visual img{
+  margin:0!important;
+  vertical-align:bottom!important;
+}
+.landing-page #features{
+  border-top:0!important;
+}
+
+/* New icon assets: simple 24x24 standalone SVG files with clean viewBoxes. */
+.solarbiz-ui-icon{
+  display:block!important;
+  flex:0 0 auto!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+
+.feature-card-ui-icon,
+.feature-detail-ui-icon{
+  width:40px!important;
+  height:40px!important;
+  padding:8px!important;
+  margin:0 0 18px!important;
+  border-radius:10px!important;
+  background:#eef3ff!important;
+}
+
+.landing-feature-card.feature-primary .feature-card-ui-icon{
+  background:#fff!important;
+}
+
+.landing-feature-card>span{
+  margin-bottom:18px!important;
+}
+
+.flow-card-ui-icon{
+  width:30px!important;
+  height:30px!important;
+  margin:0 0 14px!important;
+}
+
+.flow-card>span{
+  margin-bottom:10px!important;
+}
+
+.tool-card-ui-icon,
+.tool-detail-ui-icon{
+  width:34px!important;
+  height:34px!important;
+  padding:6px!important;
+  margin:0 0 16px!important;
+  border-radius:9px!important;
+  background:#eef3ff!important;
+}
+
+.marketing-flow-ui-icon{
+  width:28px!important;
+  height:28px!important;
+  margin:0 0 16px!important;
+}
+
+.public-calc-head{
+  grid-template-columns:auto auto minmax(0,1fr)!important;
+  align-items:center!important;
+}
+.public-calc-ui-icon{
+  width:36px!important;
+  height:36px!important;
+  padding:7px!important;
+  border-radius:9px!important;
+  background:#eef3ff!important;
+}
+.public-calc-head>span{
+  align-self:center!important;
+}
+
+/* Give icon-enabled cards a slightly clearer vertical rhythm. */
+.landing-feature-card,
+.feature-detail{
+  min-height:224px!important;
+}
+.flow-card{
+  min-height:158px!important;
+}
+.landing-page .landing-tool-grid>div{
+  min-height:158px!important;
+}
+.tool-detail-grid>div{
+  min-height:190px!important;
+}
+
+/* Keep icon use selective. Pricing/contact stay text-first. */
+.pricing-plan-icon,
+.contact-page-icon{
+  display:none!important;
+}
+
+@media(max-width:980px){
+  .landing-page .landing-hero{
+    padding:76px 0 0!important;
+  }
+  .landing-page .landing-hero-copy{
+    padding-bottom:30px!important;
+  }
+}
+@media(max-width:760px){
+  .landing-page .landing-hero{
+    padding:58px 0 0!important;
+  }
+  .landing-page .landing-hero-copy{
+    padding-bottom:28px!important;
+  }
+  .landing-page .landing-hero-visual{
+    border-radius:12px 12px 0 0!important;
+  }
+  .feature-card-ui-icon,
+  .feature-detail-ui-icon{
+    width:36px!important;
+    height:36px!important;
+  }
+}
