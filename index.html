@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Solar Biz - 1인 사업자를 위한 사업 운영 대시보드" />
-  <title>Solarbiz.</title>
+  <meta name="description" content="Solarbiz. - 1인사업자의 고객, 프로젝트, 매출, 세금, 인력을 한 곳에서 관리하는 Business OS" />
+  <title>Solarbiz. — 1인사업자 Business OS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
@@ -12,159 +12,125 @@
   <link rel="icon" type="image/svg+xml" href="./assets/solarbiz-symbol.svg" />
   <link rel="stylesheet" href="./styles.css" />
 </head>
-<body class="auth-pending">
-  <section class="auth-gate" id="authGate" aria-label="로그인">
-    <div class="auth-panel">
-      <div class="auth-brand">
-        <img class="brand-logo brand-logo-auth" src="./assets/solarbiz-logo.svg" alt="Solarbiz." />
-        <div>
-          <h1>사업 운영을 한 곳에서 관리하세요.</h1>
-          <p>클라이언트, 프로젝트, 매출, 비용, 인력과 세금 일정을 사용자별로 분리해 관리합니다.</p>
-        </div>
-      </div>
-
-      <form id="authForm" class="auth-form">
-        <label>이메일
-          <input id="authEmail" name="email" type="email" autocomplete="email" placeholder="name@example.com" required />
-        </label>
-        <label>비밀번호
-          <input id="authPassword" name="password" type="password" autocomplete="current-password" minlength="8" placeholder="8자 이상" required />
-        </label>
-        <p class="auth-message" id="authMessage" aria-live="polite"></p>
-        <button type="submit" class="primary-btn auth-primary">로그인</button>
-        <button type="button" class="ghost-btn auth-secondary" id="authSignUp">회원가입</button>
-        <button type="button" class="ghost-btn auth-preview" id="authPreview" hidden>개발 미리보기로 시작</button>
-      </form>
-      <p class="auth-footnote">실서비스에서는 사용자 인증 후 각 계정의 사업 데이터만 불러오도록 구성합니다.</p>
+<body class="landing-page">
+  <header class="landing-header">
+    <a class="landing-brand" href="./" aria-label="Solarbiz. 홈">
+      <img src="./assets/solarbiz-logo.svg" alt="Solarbiz." />
+    </a>
+    <nav class="landing-nav" aria-label="랜딩 메뉴">
+      <a href="#features">기능</a>
+      <a href="#flow">운영 흐름</a>
+      <a href="#tools">계산기</a>
+    </nav>
+    <div class="landing-actions">
+      <a class="landing-login" href="./login/">로그인</a>
+      <a class="landing-cta-small" href="./login/?mode=signup">무료로 시작하기</a>
     </div>
-  </section>
+  </header>
 
-  <div id="app" class="app-shell hidden">
-    <aside class="sidebar">
-      <div class="brand">
-        <img class="brand-logo brand-logo-sidebar brand-logo-full" src="./assets/solarbiz-logo.svg" alt="Solarbiz." />
-        <img class="brand-logo brand-logo-sidebar-symbol" src="./assets/solarbiz-symbol.svg" alt="" aria-hidden="true" />
+  <main>
+    <section class="landing-hero">
+      <div class="landing-hero-copy">
+        <p class="landing-kicker">BUSINESS OS FOR SOLO BUSINESS</p>
+        <h1>혼자 사업해도,<br><span>관리는 한 곳에서.</span></h1>
+        <p class="landing-lead">클라이언트, 프로젝트, 매출과 비용, 3.3% 인력, 세금 일정을 따로 기억하지 마세요. Solarbiz.가 사업의 흐름을 연결하고 다음 할 일을 보여줍니다.</p>
+        <div class="landing-hero-actions">
+          <a class="landing-cta" href="./login/?mode=signup">Solarbiz. 시작하기</a>
+          <a class="landing-text-link" href="#features">무엇을 할 수 있나요? →</a>
+        </div>
+        <p class="landing-note">초기 MVP · 개인사업자 중심 · Firebase 기반</p>
       </div>
 
-      <nav class="nav" aria-label="주요 메뉴">
-        <button class="nav-item active" data-page="dashboard"><span>⌂</span>대시보드</button>
-        <button class="nav-item" data-page="finance"><span>↗</span>매출 · 매입</button>
-        <button class="nav-item" data-page="tax"><span>◎</span>세금 · 신고</button>
-        <button class="nav-item" data-page="clients"><span>◫</span>클라이언트</button>
-        <button class="nav-item" data-page="projects"><span>◇</span>프로젝트</button>
-        <button class="nav-item" data-page="people"><span>♙</span>인력 관리</button>
-        <button class="nav-item" data-page="calendar"><span>□</span>사업 일정</button>
-        <button class="nav-item" data-page="documents"><span>≡</span>문서 보관</button>
-        <button class="nav-item" data-page="calculator"><span>＋</span>계산기</button>
-        <button class="nav-item mobile-only" data-page="settings"><span>⚙</span>설정</button>
-      </nav>
-
-      <div class="sidebar-bottom">
-        <button class="nav-item" data-page="settings"><span>⚙</span>사업자 설정</button>
-        <div class="profile-mini">
-          <div class="avatar" id="avatar">P</div>
-          <div>
-            <strong id="miniName">내 사업자</strong>
-            <span id="miniType">개인사업자</span>
+      <div class="landing-product-preview" aria-label="Solarbiz 대시보드 미리보기">
+        <div class="preview-top">
+          <img src="./assets/solarbiz-symbol.svg" alt="" />
+          <span>이번 달 사업 현황</span>
+          <b>2026.09</b>
+        </div>
+        <div class="preview-metrics">
+          <div><span>매출</span><strong>₩12.4M</strong><small>+18.2%</small></div>
+          <div><span>비용</span><strong>₩4.2M</strong><small>이번 달</small></div>
+          <div class="preview-blue"><span>예상 잔액</span><strong>₩8.2M</strong><small>세금 전</small></div>
+        </div>
+        <div class="preview-grid">
+          <div class="preview-panel">
+            <span class="preview-label">NEXT</span>
+            <strong>원천세 신고</strong>
+            <p>10월 10일 · D-19</p>
+          </div>
+          <div class="preview-panel">
+            <span class="preview-label">RECEIVABLE</span>
+            <strong>₩2,200,000</strong>
+            <p>미수금 2건</p>
           </div>
         </div>
       </div>
-    </aside>
+    </section>
 
-    <main class="main">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow" id="todayLabel"></p>
-          <h1 id="pageTitle">대시보드</h1>
-        </div>
-        <div class="top-actions">
-          <span class="account-email" id="accountEmail"></span>
-          <button class="ghost-btn" id="logoutBtn">로그아웃</button>
-          <button class="ghost-btn" id="resetDemo">초기화</button>
-          <button class="primary-btn" id="openQuick">+ 빠른 등록</button>
-        </div>
-      </header>
-
-      <section id="content"></section>
-    </main>
-  </div>
-
-  <div class="modal-backdrop hidden" id="onboardingModal">
-    <div class="modal onboarding">
-      <div class="modal-head onboarding-brand-head">
-        <img class="brand-logo brand-logo-onboarding" src="./assets/solarbiz-logo.svg" alt="Solarbiz." />
-        <div>
-          <p class="eyebrow">BUSINESS SETUP</p>
-          <h2>사업 운영 정보를 먼저 설정해볼게요.</h2>
-          <p>기본 정보만 입력하면 필요한 신고 일정과 관리 항목을 맞춤 구성합니다.</p>
-        </div>
+    <section class="landing-section" id="features">
+      <div class="landing-section-head">
+        <p class="landing-kicker">WHAT IT MANAGES</p>
+        <h2>사업 운영에 필요한 핵심만 연결합니다.</h2>
       </div>
-
-      <form id="onboardingForm" class="form-grid">
-        <label>상호명<input name="businessName" placeholder="예: 나인웍스" required /></label>
-        <label>대표자명<input name="ownerName" placeholder="예: 박재영" required /></label>
-        <label>사업자등록번호<input name="businessNumber" placeholder="000-00-00000" /></label>
-        <label>사업장 주소<input name="address" placeholder="사업장 주소" /></label>
-        <label>사업자 형태
-          <select name="businessType">
-            <option value="개인사업자">개인사업자</option>
-            <option value="법인사업자">법인사업자</option>
-          </select>
-        </label>
-        <label>과세 유형
-          <select name="taxType">
-            <option value="일반과세자">일반과세자</option>
-            <option value="간이과세자">간이과세자</option>
-            <option value="면세사업자">면세사업자</option>
-          </select>
-        </label>
-        <label>업종<input name="industry" placeholder="예: 디자인 서비스업" /></label>
-        <label>개업일<input name="startDate" type="date" /></label>
-
-        <div class="check-card">
-          <span>직원(4대보험) 고용</span>
-          <label class="switch"><input name="hasEmployee" type="checkbox" /><i></i></label>
-        </div>
-        <div class="check-card">
-          <span>3.3% 인력 사용</span>
-          <label class="switch"><input name="hasFreelancer" type="checkbox" checked /><i></i></label>
-        </div>
-
-        <div class="modal-actions">
-          <button type="button" class="ghost-btn" id="demoStart">테스트 데이터로 시작</button>
-          <button type="submit" class="primary-btn">대시보드 만들기</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="modal-backdrop hidden" id="quickModal">
-    <div class="modal compact">
-      <div class="modal-title-row">
-        <div><p class="eyebrow">QUICK ADD</p><h2>빠른 등록</h2></div>
-        <button class="icon-btn" data-close="quickModal">×</button>
+      <div class="landing-feature-grid">
+        <article class="landing-feature-card feature-primary">
+          <span>01</span>
+          <h3>고객에서 매출까지</h3>
+          <p>클라이언트와 프로젝트를 만들면 계약금액, 세금계산서, 입금과 미수금까지 한 흐름으로 관리합니다.</p>
+        </article>
+        <article class="landing-feature-card">
+          <span>02</span>
+          <h3>세금 일정 자동 안내</h3>
+          <p>사업자 유형과 3.3%, 직원 사용 여부에 따라 필요한 원천세·부가세·종소세 일정을 보여줍니다.</p>
+        </article>
+        <article class="landing-feature-card">
+          <span>03</span>
+          <h3>혼자 쓰기 쉬운 계산기</h3>
+          <p>VAT, 3.3%, 마진, 프로젝트 시간단가를 계산하고 이후 실제 사업 데이터와 연결합니다.</p>
+        </article>
       </div>
-      <form id="quickForm" class="form-grid one">
-        <label>구분
-          <select name="type">
-            <option value="매출">매출</option>
-            <option value="매입">매입</option>
-          </select>
-        </label>
-        <label>내용<input name="title" placeholder="예: 브랜드 디자인 잔금" required /></label>
-        <label>거래처<input name="client" placeholder="예: 건강미" /></label>
-        <label>금액<input name="amount" type="number" min="0" placeholder="1000000" required /></label>
-        <label>거래일<input name="date" type="date" required /></label>
-        <div class="modal-actions">
-          <button type="button" class="ghost-btn" data-close="quickModal">취소</button>
-          <button type="submit" class="primary-btn">등록</button>
-        </div>
-      </form>
-    </div>
-  </div>
+    </section>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./config.js"></script>
-  <script src="./auth.js"></script>
+    <section class="landing-section landing-flow-section" id="flow">
+      <div class="landing-section-head">
+        <p class="landing-kicker">ONE CONNECTED FLOW</p>
+        <h2>한 번 입력하면 다음 관리가 이어지도록.</h2>
+      </div>
+      <div class="landing-flow">
+        <div><b>Client</b><span>클라이언트</span></div><i>→</i>
+        <div><b>Project</b><span>프로젝트</span></div><i>→</i>
+        <div><b>Invoice</b><span>세금계산서</span></div><i>→</i>
+        <div><b>Payment</b><span>입금 / 미수금</span></div><i>→</i>
+        <div><b>Tax</b><span>세금 일정</span></div>
+      </div>
+    </section>
+
+    <section class="landing-section" id="tools">
+      <div class="landing-section-head">
+        <p class="landing-kicker">BUSINESS TOOLS</p>
+        <h2>매일 필요한 계산도 한 곳에서.</h2>
+      </div>
+      <div class="landing-tool-grid">
+        <div><span>VAT</span><strong>부가세 정방향 · 역산</strong></div>
+        <div><span>3.3%</span><strong>총액 · 실수령 역산</strong></div>
+        <div><span>MARGIN</span><strong>이익 · 마진율</strong></div>
+        <div><span>RATE</span><strong>프로젝트 시간단가</strong></div>
+      </div>
+    </section>
+
+    <section class="landing-final">
+      <img src="./assets/solarbiz-symbol.svg" alt="" />
+      <div>
+        <p class="landing-kicker">SOLARBIZ.</p>
+        <h2>사업에 집중하세요.<br>나머지는 한 곳에서 정리하세요.</h2>
+      </div>
+      <a class="landing-cta" href="./login/?mode=signup">무료로 시작하기</a>
+    </section>
+  </main>
+
+  <footer class="landing-footer">
+    <img src="./assets/solarbiz-logo.svg" alt="Solarbiz." />
+    <span>1인사업자를 위한 Business OS</span>
+  </footer>
 </body>
 </html>
