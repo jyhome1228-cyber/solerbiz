@@ -39,7 +39,7 @@
     document.body.classList.remove("auth-pending");
     if(!document.querySelector('script[data-solar-app]')){
       const script=document.createElement("script");
-      script.src="../app.js";
+      script.src="../app.js?v=20260922-2";
       script.defer=true;
       script.dataset.solarApp="true";
       document.body.appendChild(script);
