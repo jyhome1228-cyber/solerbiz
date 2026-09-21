@@ -418,7 +418,7 @@ function render(page=currentPage){
   currentPage=page;
   $("#pageTitle").textContent=pages[page][0];
   $("#content").innerHTML=pages[page][1]();
-  $$(".nav-item[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+  $$$(".nav-item[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
   bindDynamic();
   updateIdentity();
 }
