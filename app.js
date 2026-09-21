@@ -440,7 +440,7 @@ function normalizeInvoiceDate(raw=""){
   if(!m)return "";
   const y=Number(m[1]),mo=Number(m[2]),d=Number(m[3]);
   if(mo<1||mo>12||d<1||d>31)return "";
-  return \`${y}-\${pad2(mo)}-\${pad2(d)}\`;
+  return `${y}-\${pad2(mo)}-\${pad2(d)}`;
 }
 function groupPdfLines(items){
   const rows=[];
@@ -585,18 +585,18 @@ async function handleTaxInvoiceFiles(files){
   const list=[...files].filter(f=>f.type==="application/pdf"||/\.pdf$/i.test(f.name));
   if(!list.length){taxInvoiceStatus={text:"PDF 파일을 선택해주세요.",type:"error"};render("finance");return}
   taxInvoiceBusy=true;
-  taxInvoiceStatus={text:\`${list.length}개 PDF를 분석하고 있습니다…\`,type:""};
+  taxInvoiceStatus={text:`${list.length}개 PDF를 분석하고 있습니다…`,type:""};
   render("finance");
   const drafts=[];
   const errors=[];
   for(const file of list){
     try{drafts.push(await parseTaxInvoiceFile(file))}
-    catch(err){errors.push(\`${file.name}: ${err.message||"분석 실패"}\`)}
+    catch(err){errors.push(`${file.name}: ${err.message||"분석 실패"}`)}
   }
   taxInvoiceDrafts=[...taxInvoiceDrafts,...drafts];
   taxInvoiceBusy=false;
   taxInvoiceStatus={
-    text:errors.length?\`${drafts.length}건 분석 완료 · ${errors.length}건 확인 필요\`:\`${drafts.length}건 분석 완료. 내용을 확인한 뒤 저장하세요.\`,
+    text:errors.length?`${drafts.length}건 분석 완료 · ${errors.length}건 확인 필요`:`${drafts.length}건 분석 완료. 내용을 확인한 뒤 저장하세요.`,
     type:errors.length?"error":"ok"
   };
   if(errors.length)taxInvoiceStatus.detail=errors.join(" / ");
@@ -652,7 +652,7 @@ function saveTaxInvoiceDraft(id){
   });
   taxInvoiceDrafts=taxInvoiceDrafts.filter(x=>String(x.id)!==String(id));
   save();
-  taxInvoiceStatus={text:\`${d.clientName} 세금계산서를 ${d.type} 기록으로 저장했습니다.\`,type:"ok"};
+  taxInvoiceStatus={text:`${d.clientName} 세금계산서를 ${d.type} 기록으로 저장했습니다.`,type:"ok"};
   render("finance");
 }
 function updateTaxInvoiceDraft(id,field,value){
@@ -665,7 +665,7 @@ function updateTaxInvoiceDraft(id,field,value){
 }
 function invoiceDraftCard(d){
   const badge=d.warnings.length?d.warnings.join(" · "):(d.clientMatched?"기존 거래처 연결":"신규 거래처 생성");
-  return \`<article class="invoice-draft">
+  return `<article class="invoice-draft">
     <div class="invoice-draft-top">
       <div class="invoice-draft-file"><strong>${esc(d.fileName)}</strong><span>${esc(d.matchNote)}</span></div>
       <span class="invoice-draft-warning ${d.warnings.length?"":"ok"}">${esc(badge)}</span>
@@ -679,20 +679,20 @@ function invoiceDraftCard(d){
       <label>VAT<input type="number" value="${Number(d.vatAmount||0)}" data-tax-draft-id="${d.id}" data-tax-draft-field="vatAmount"></label>
     </div>
     <div class="invoice-draft-actions"><button class="remove" data-tax-draft-remove="${d.id}">제외</button><button class="save" data-tax-draft-save="${d.id}">확인 후 저장 · ${won(d.totalAmount)}</button></div>
-  </article>\`;
+  </article>`;
 }
 function financeRecordView(m){
-  return \`<div class="metrics">${metric(m.label+" 매출",won(m.sales),"합계금액","up")}${metric(m.label+" 매입",won(m.costs),"합계금액")}${metric("매출 VAT",won(m.salesVat),"등록 기준")}${metric("예상 부가세",won(m.estimatedVat),`매출 VAT - 매입 VAT ${won(m.purchaseVat)}`)}</div>
+  return `<div class="metrics">${metric(m.label+" 매출",won(m.sales),"합계금액","up")}${metric(m.label+" 매입",won(m.costs),"합계금액")}${metric("매출 VAT",won(m.salesVat),"등록 기준")}${metric("예상 부가세",won(m.estimatedVat),`매출 VAT - 매입 VAT ${won(m.purchaseVat)}`)}</div>
   <div class="table-card"><table class="table"><thead><tr><th>거래일</th><th>구분</th><th>내용</th><th>거래처</th><th>증빙</th><th class="money">공급가액</th><th class="money">VAT</th><th class="money">합계</th></tr></thead><tbody>
   ${state.transactions.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(t=>{const a=transactionAmounts(t);return `<tr><td>${t.date}</td><td><span class="pill ${t.type==='매출'?'success':''}">${t.type}</span></td><td>${esc(t.title)}</td><td>${esc(t.client||'-')}</td><td>${t.source==='tax-invoice'?'<span class="invoice-source">세금계산서</span>':'직접 등록'}</td><td class="money">${won(a.supply)}</td><td class="money">${won(a.vat)}</td><td class="money ${t.type==='매출'?'positive':'negative'}">${won(a.total)}</td></tr>`}).join("")||'<tr><td colspan="8" class="empty">거래를 등록해보세요.</td></tr>'}
-  </tbody></table></div>\`;
+  </tbody></table></div>`;
 }
 function taxInvoiceImportView(){
   const saved=state.taxInvoices||[];
   const sales=saved.filter(x=>x.type==="매출");
   const totalSupply=sales.reduce((s,x)=>s+Number(x.supplyAmount||0),0);
   const totalVat=sales.reduce((s,x)=>s+Number(x.vatAmount||0),0);
-  return \`<div class="invoice-import-layout">
+  return `<div class="invoice-import-layout">
     <div class="invoice-import-intro">
       <div><h3>전자세금계산서 PDF를 넣으면 거래처와 매출 기록으로 정리합니다.</h3><p>PDF의 공급자·공급받는자, 작성일, 공급가액과 세액을 읽고 내 사업자번호를 기준으로 매출·매입을 구분합니다. 저장 전 결과를 직접 확인하고 수정할 수 있습니다.</p></div>
       <div class="invoice-import-meta"><span>텍스트형 PDF</span><span>사업자번호 매칭</span><span>확인 후 저장</span></div>
@@ -707,14 +707,14 @@ function taxInvoiceImportView(){
       <div class="invoice-history-head"><h3>정리된 세금계산서</h3><span>${saved.length}건 저장</span></div>
       ${saved.length?`<div class="invoice-summary"><div><span>매출 세금계산서</span><strong>${sales.length}건</strong></div><div><span>누적 공급가액</span><strong>${won(totalSupply)}</strong></div><div><span>누적 VAT</span><strong>${won(totalVat)}</strong></div><div><span>등록 거래처</span><strong>${new Set(saved.map(x=>x.clientName).filter(Boolean)).size}곳</strong></div></div><div class="table-card invoice-history-table"><table class="table"><thead><tr><th>작성일</th><th>구분</th><th>거래처</th><th>사업자번호</th><th>파일</th><th class="money">공급가액</th><th class="money">VAT</th><th class="money">합계</th></tr></thead><tbody>${saved.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(x=>`<tr><td>${esc(x.date)}</td><td><span class="pill ${x.type==='매출'?'success':''}">${esc(x.type)}</span></td><td>${esc(x.clientName)}</td><td>${esc(x.clientBusinessNumber||'-')}</td><td>${esc(x.fileName||'-')}</td><td class="money">${won(x.supplyAmount)}</td><td class="money">${won(x.vatAmount)}</td><td class="money">${won(x.totalAmount)}</td></tr>`).join("")}</tbody></table></div>`:`<div class="invoice-empty">아직 정리된 세금계산서가 없습니다.<br>전자세금계산서 PDF를 넣어 첫 매출 기록을 만들어보세요.</div>`}
     </div>
-  </div>\`;
+  </div>`;
 }
 function pageFinance(){
   const m=getMonthData();
-  return \`
+  return `
   <div class="section-title"><div><p class="eyebrow">SALES RECORDS</p><h2>매출기록</h2><p class="section-desc">직접 등록하거나 세금계산서 PDF를 가져와 매출·매입과 VAT 기록을 정리합니다.</p></div><button class="primary-btn" data-open-quick>+ 거래 등록</button></div>
   <div class="finance-tabs"><button class="finance-tab ${financeTab==='records'?'active':''}" data-finance-tab="records">거래내역</button><button class="finance-tab ${financeTab==='invoice'?'active':''}" data-finance-tab="invoice">세금계산서 정리</button></div>
-  ${financeTab==='invoice'?taxInvoiceImportView():financeRecordView(m)}\`;
+  ${financeTab==='invoice'?taxInvoiceImportView():financeRecordView(m)}`;
 }
 function pageTax(){
   const p=state.profile||{};
@@ -982,7 +982,7 @@ function pageSettings(){
     <div class="modal-actions"><button class="primary-btn">변경사항 저장</button></div>
   </form>`;
 }
-const pages={dashboard:["대시보드",pageDashboard],finance:["매출 · 매입",pageFinance],tax:["세금 · 신고",pageTax],clients:["클라이언트",pageClients],projects:["프로젝트",pageProjects],people:["인력 관리",pagePeople],calendar:["사업 일정",pageCalendar],analytics:["사업 분석",pageAnalytics],documents:["문서 보관",pageDocuments],calculator:["계산기",pageCalculator],settings:["사업자 설정",pageSettings]};
+const pages={dashboard:["대시보드",pageDashboard],finance:["매출기록",pageFinance],tax:["세금 · 신고",pageTax],clients:["클라이언트",pageClients],projects:["프로젝트",pageProjects],people:["인력 관리",pagePeople],calendar:["사업 일정",pageCalendar],analytics:["사업 분석",pageAnalytics],documents:["문서 보관",pageDocuments],calculator:["계산기",pageCalculator],settings:["사업자 설정",pageSettings]};
 let currentPage="dashboard";
 
 function render(page=currentPage){
@@ -1150,7 +1150,7 @@ $("#demoStart").onclick=()=>{
 };
 $("#resetDemo").onclick=async()=>{
   if(!confirm("저장된 사업자 및 테스트 데이터를 초기화할까요?"))return;
-  ["profile","transactions","clients","projects","tasks"].forEach(k=>localStorage.removeItem(storageKey(k)));
+  ["profile","transactions","clients","projects","taxInvoices","tasks"].forEach(k=>localStorage.removeItem(storageKey(k)));
   if(FIRESTORE_READY){
     try{
       await firebase.firestore().collection("businesses").doc(CLOUD_BUSINESS_ID).collection("app").doc("state").delete();
