@@ -4,6 +4,22 @@ const KRW=new Intl.NumberFormat("ko-KR",{style:"currency",currency:"KRW",maximum
 const AUTH_USER=window.SOLAR_BIZ_USER||{id:"anonymous",email:""};
 const STORAGE_PREFIX=`solerbiz.${AUTH_USER.id}`;
 const storageKey=(name)=>`${STORAGE_PREFIX}.${name}`;
+const FIRESTORE_READY=Boolean(
+  !AUTH_USER.isLocalPreview &&
+  window.firebase &&
+  firebase.apps?.length &&
+  typeof firebase.firestore==="function"
+);
+const CLOUD_BUSINESS_ID=AUTH_USER.id;
+let cloudSaveTimer=null;
+let cloudHydrated=false;
+
+function setSyncStatus(text,state=""){
+  const el=$("#syncStatus");
+  if(!el)return;
+  el.textContent=text;
+  el.dataset.state=state;
+}
 
 const demoProfile={
   businessName:"나인웍스",
@@ -53,6 +69,89 @@ function save(){
   localStorage.setItem(storageKey("clients"),JSON.stringify(state.clients));
   localStorage.setItem(storageKey("projects"),JSON.stringify(state.projects));
   localStorage.setItem(storageKey("tasks"),JSON.stringify(state.tasks));
+  scheduleCloudSave();
+}
+function scheduleCloudSave(){
+  if(!FIRESTORE_READY||!cloudHydrated)return;
+  clearTimeout(cloudSaveTimer);
+  setSyncStatus("저장 중…","saving");
+  cloudSaveTimer=setTimeout(()=>persistCloudState(),450);
+}
+async function persistCloudState(){
+  if(!FIRESTORE_READY)return;
+  try{
+    const db=firebase.firestore();
+    const now=firebase.firestore.FieldValue.serverTimestamp();
+    const businessRef=db.collection("businesses").doc(CLOUD_BUSINESS_ID);
+    await businessRef.set({
+      ownerUid:AUTH_USER.id,
+      name:state.profile?.businessName||"",
+      taxType:state.profile?.taxType||"",
+      businessType:state.profile?.businessType||"",
+      updatedAt:now
+    },{merge:true});
+    await businessRef.collection("app").doc("state").set({
+      profile:state.profile||null,
+      transactions:state.transactions,
+      clients:state.clients,
+      projects:state.projects,
+      tasks:state.tasks,
+      updatedAt:now
+    },{merge:true});
+    await db.collection("users").doc(AUTH_USER.id).set({
+      email:AUTH_USER.email||"",
+      lastActiveAt:now
+    },{merge:true});
+    setSyncStatus("동기화됨","ok");
+  }catch(err){
+    console.error("Firestore save failed",err);
+    setSyncStatus("동기화 확인 필요","error");
+  }
+}
+async function hydrateCloudState(){
+  if(!FIRESTORE_READY){
+    cloudHydrated=true;
+    setSyncStatus("이 기기에 저장","local");
+    return;
+  }
+  setSyncStatus("불러오는 중…","saving");
+  try{
+    const db=firebase.firestore();
+    const businessRef=db.collection("businesses").doc(CLOUD_BUSINESS_ID);
+    const businessSnap=await businessRef.get();
+    const stateSnap=await businessRef.collection("app").doc("state").get();
+
+    if(stateSnap.exists){
+      const remote=stateSnap.data()||{};
+      state.profile=remote.profile??state.profile;
+      state.transactions=Array.isArray(remote.transactions)?remote.transactions:state.transactions;
+      state.clients=Array.isArray(remote.clients)?remote.clients:state.clients;
+      state.projects=Array.isArray(remote.projects)?remote.projects:state.projects;
+      state.tasks=Array.isArray(remote.tasks)?remote.tasks:state.tasks;
+      localStorage.setItem(storageKey("profile"),JSON.stringify(state.profile));
+      localStorage.setItem(storageKey("transactions"),JSON.stringify(state.transactions));
+      localStorage.setItem(storageKey("clients"),JSON.stringify(state.clients));
+      localStorage.setItem(storageKey("projects"),JSON.stringify(state.projects));
+      localStorage.setItem(storageKey("tasks"),JSON.stringify(state.tasks));
+    }else{
+      await businessRef.set({
+        ownerUid:AUTH_USER.id,
+        name:state.profile?.businessName||"",
+        taxType:state.profile?.taxType||"",
+        businessType:state.profile?.businessType||"",
+        createdAt:firebase.firestore.FieldValue.serverTimestamp()
+      },{merge:true});
+    }
+    cloudHydrated=true;
+    setSyncStatus("동기화됨","ok");
+    if(!stateSnap.exists&&(state.profile||state.transactions.length||state.clients.length||state.projects.length)){
+      await persistCloudState();
+    }
+  }catch(err){
+    console.error("Firestore load failed",err);
+    cloudHydrated=true;
+    setSyncStatus("로컬 저장 중","error");
+  }
 }
 function esc(v=""){return String(v).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function won(v){return KRW.format(Number(v||0))}
@@ -511,6 +610,53 @@ function hourlyCalculator(){
       </div>
     </div>`;
 }
+function pageAnalytics(){
+  const totalSales=state.transactions.filter(x=>x.type==="매출").reduce((sum,t)=>sum+transactionAmounts(t).total,0);
+  const totalCosts=state.transactions.filter(x=>x.type==="매입").reduce((sum,t)=>sum+transactionAmounts(t).total,0);
+  const profit=totalSales-totalCosts;
+  const receivable=state.clients.reduce((sum,x)=>sum+Number(x.receivable||0),0);
+  const byClient={};
+  state.transactions.filter(x=>x.type==="매출").forEach(t=>{
+    const key=t.client||"미분류";
+    byClient[key]=(byClient[key]||0)+transactionAmounts(t).total;
+  });
+  const topClients=Object.entries(byClient).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const activeProjects=state.projects.filter(p=>!["종료","취소"].includes(p.status)).length;
+  return `
+  <div class="section-title"><div><p class="eyebrow">ANALYTICS</p><h2>사업 분석</h2><p class="section-desc">등록된 데이터를 기준으로 현재 사업 구조를 간단히 확인합니다.</p></div></div>
+  <div class="metrics analytics-metrics">
+    ${metric("누적 매출",won(totalSales),state.transactions.filter(x=>x.type==="매출").length+"건","up")}
+    ${metric("누적 비용",won(totalCosts),state.transactions.filter(x=>x.type==="매입").length+"건")}
+    ${metric("누적 영업잔액",won(profit),"매출 - 비용")}
+    ${metric("현재 미수금",won(receivable),state.clients.filter(x=>x.receivable>0).length+"개 거래처")}
+  </div>
+  <div class="grid-2 analytics-grid">
+    <div class="card">
+      <div class="card-head"><h3>클라이언트별 매출</h3><span>상위 5</span></div>
+      <div class="analytics-list">
+        ${topClients.length?topClients.map(([name,value])=>{
+          const ratio=totalSales>0?Math.max(4,value/totalSales*100):0;
+          return `<div class="analytics-row"><div><strong>${esc(name)}</strong><span>${won(value)}</span></div><div class="analytics-bar"><i style="width:${ratio}%"></i></div></div>`
+        }).join(""):'<div class="empty">매출 데이터가 쌓이면 거래처별 비중을 보여줍니다.</div>'}
+      </div>
+    </div>
+    <div>
+      <div class="card analytics-summary">
+        <div class="card-head"><h3>사업 상태</h3><span>현재 기준</span></div>
+        <dl>
+          <div><dt>클라이언트</dt><dd>${state.clients.length}개</dd></div>
+          <div><dt>진행 프로젝트</dt><dd>${activeProjects}개</dd></div>
+          <div><dt>등록 거래</dt><dd>${state.transactions.length}건</dd></div>
+          <div><dt>이번 달 할 일</dt><dd>${deadlines().length}건</dd></div>
+        </dl>
+      </div>
+      <div class="card analytics-summary">
+        <div class="card-head"><h3>다음 개선 포인트</h3></div>
+        <p class="analytics-tip">${receivable>0?"미수금이 있습니다. 입금 예정일과 거래처를 먼저 확인해보세요.":"현재 미수금은 없습니다. 프로젝트별 실제 손익을 꾸준히 기록해보세요."}</p>
+      </div>
+    </div>
+  </div>`;
+}
 function pageSettings(){
   const p=state.profile;
   return `<div class="section-title"><div><p class="eyebrow">BUSINESS PROFILE</p><h2>사업자 설정</h2></div></div>
@@ -529,7 +675,7 @@ function pageSettings(){
     <div class="modal-actions"><button class="primary-btn">변경사항 저장</button></div>
   </form>`;
 }
-const pages={dashboard:["대시보드",pageDashboard],finance:["매출 · 매입",pageFinance],tax:["세금 · 신고",pageTax],clients:["클라이언트",pageClients],projects:["프로젝트",pageProjects],people:["인력 관리",pagePeople],calendar:["사업 일정",pageCalendar],documents:["문서 보관",pageDocuments],calculator:["계산기",pageCalculator],settings:["사업자 설정",pageSettings]};
+const pages={dashboard:["대시보드",pageDashboard],finance:["매출 · 매입",pageFinance],tax:["세금 · 신고",pageTax],clients:["클라이언트",pageClients],projects:["프로젝트",pageProjects],people:["인력 관리",pagePeople],calendar:["사업 일정",pageCalendar],analytics:["사업 분석",pageAnalytics],documents:["문서 보관",pageDocuments],calculator:["계산기",pageCalculator],settings:["사업자 설정",pageSettings]};
 let currentPage="dashboard";
 
 function render(page=currentPage){
@@ -695,14 +841,23 @@ $("#demoStart").onclick=()=>{
   ];save();
   $("#onboardingModal").classList.add("hidden");render("dashboard");
 };
-$("#resetDemo").onclick=()=>{
+$("#resetDemo").onclick=async()=>{
   if(!confirm("저장된 사업자 및 테스트 데이터를 초기화할까요?"))return;
   ["profile","transactions","clients","projects","tasks"].forEach(k=>localStorage.removeItem(storageKey(k)));
+  if(FIRESTORE_READY){
+    try{
+      await firebase.firestore().collection("businesses").doc(CLOUD_BUSINESS_ID).collection("app").doc("state").delete();
+    }catch(err){console.warn("Cloud reset failed",err)}
+  }
   location.reload();
 };
 
-if(!state.profile){
-  $("#onboardingModal")?.classList.remove("hidden");
-}else{
-  render("dashboard");
+async function bootstrapApp(){
+  await hydrateCloudState();
+  if(!state.profile){
+    $("#onboardingModal")?.classList.remove("hidden");
+  }else{
+    render("dashboard");
+  }
 }
+bootstrapApp();
