@@ -26,10 +26,12 @@
         <button class="nav-item" data-page="finance"><span>↗</span>매출 · 매입</button>
         <button class="nav-item" data-page="tax"><span>◎</span>세금 · 신고</button>
         <button class="nav-item" data-page="clients"><span>◫</span>클라이언트</button>
+        <button class="nav-item" data-page="projects"><span>◇</span>프로젝트</button>
         <button class="nav-item" data-page="people"><span>♙</span>인력 관리</button>
         <button class="nav-item" data-page="calendar"><span>□</span>사업 일정</button>
         <button class="nav-item" data-page="documents"><span>≡</span>문서 보관</button>
         <button class="nav-item" data-page="calculator"><span>＋</span>계산기</button>
+        <button class="nav-item mobile-only" data-page="settings"><span>⚙</span>설정</button>
       </nav>
 
       <div class="sidebar-bottom">
@@ -74,6 +76,8 @@
       <form id="onboardingForm" class="form-grid">
         <label>상호명<input name="businessName" placeholder="예: 나인웍스" required /></label>
         <label>대표자명<input name="ownerName" placeholder="예: 박재영" required /></label>
+        <label>사업자등록번호<input name="businessNumber" placeholder="000-00-00000" /></label>
+        <label>사업장 주소<input name="address" placeholder="사업장 주소" /></label>
         <label>사업자 형태
           <select name="businessType">
             <option value="개인사업자">개인사업자</option>
@@ -121,6 +125,7 @@
           </select>
         </label>
         <label>내용<input name="title" placeholder="예: 브랜드 디자인 잔금" required /></label>
+        <label>거래처<input name="client" placeholder="예: 건강미" /></label>
         <label>금액<input name="amount" type="number" min="0" placeholder="1000000" required /></label>
         <label>거래일<input name="date" type="date" required /></label>
         <div class="modal-actions">
