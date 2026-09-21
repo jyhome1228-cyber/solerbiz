@@ -2210,3 +2210,32 @@ body[data-auth-context="dashboard"] .nav-item.active .nav-icon{
     flex-basis:20px;
   }
 }
+
+
+/* Extended landing icon styling */
+.flow-card-icon{
+  width:44px;
+  height:44px;
+  display:grid;
+  place-items:center;
+  margin-bottom:14px;
+}
+.landing-page .flow-card>span{
+  margin-bottom:8px!important;
+}
+.tool-card-icon{
+  width:48px;
+  height:48px;
+  display:grid;
+  place-items:center;
+  margin-bottom:18px;
+}
+.landing-page .landing-tool-grid>div{
+  min-height:168px;
+  display:flex;
+  flex-direction:column;
+}
+.landing-page .landing-tool-grid>div>span{
+  margin-top:auto;
+  margin-bottom:8px;
+}
