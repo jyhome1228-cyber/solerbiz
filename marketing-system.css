@@ -949,10 +949,14 @@
 .tool-card-icon img{padding:7px!important}
 .feature-detail-icon img{padding:10px!important}
 
-.landing-feature-card.feature-primary h3,
-.landing-feature-card.feature-primary p,
-.landing-feature-card.feature-primary>span{
-  color:inherit!important;
+.landing-feature-card.feature-primary{
+  color:var(--marketing-text-main)!important;
+}
+.landing-feature-card.feature-primary h3{
+  color:var(--marketing-text-main)!important;
+}
+.landing-feature-card.feature-primary p{
+  color:var(--marketing-text-sub)!important;
 }
 .landing-feature-card.feature-primary>span{
   color:var(--accent)!important;
